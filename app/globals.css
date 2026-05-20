@@ -1,0 +1,47 @@
+:root {
+  --ink: #0A1628;
+  --cyan: #00A89A;
+  --gold: #B8860B;
+  --slate: #4A5568;
+  --muted: #718096;
+  --rule: #CBD5E0;
+  --panel: #F7FAFC;
+  --panel-deep: #EDF2F7;
+  --ok: #D4F4DD;
+  --ok-deep: #48BB78;
+  --warn: #FFF4E5;
+  --warn-deep: #F6AD55;
+  --crit: #FED7D7;
+  --crit-deep: #FC8181;
+  --purple-light: #EEEDFE;
+  --purple-deep: #7C3AED;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(180deg, #FAFCFE 0%, #F4F8FB 100%);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+}
+
+.scrollable { overflow-y: auto; }
+
+@media (max-width: 768px) {
+  body { padding-bottom: 72px; }
+}
