@@ -33,20 +33,25 @@ const COOKIE_NAME = 'acuterium-access';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // PWA carve-outs added in v1.4 Phase 1A — these must be reachable
-  // before the access cookie is set, otherwise the service worker
-  // can't install and the manifest/icons can't be fetched.
+  // PWA + brand carve-outs added in v1.4 Phase 1A/1C — these must be
+  // reachable before the access cookie is set, otherwise the service
+  // worker can't install, the manifest/icons can't be fetched, and
+  // browsers can't render the brand mark on the login page itself.
+  // Brand assets are non-sensitive by classification (D-08 visual
+  // extension); the real data plane remains gated below.
   if (
     pathname === '/login' ||
     pathname === '/api/login' ||
     pathname === '/api/seed' ||
     pathname === '/manifest.webmanifest' ||
     pathname === '/sw.js' ||
-    pathname === '/icon-192.png' ||
-    pathname === '/icon-512.png' ||
-    pathname === '/icon-512-maskable.png' ||
     pathname === '/sovereign-fonts.css' ||
-    pathname.startsWith('/fonts/')
+    pathname === '/apple-touch-icon.png' ||
+    pathname === '/og-image.png' ||
+    pathname.startsWith('/icon-') ||
+    pathname.startsWith('/favicon-') ||
+    pathname.startsWith('/fonts/') ||
+    pathname.startsWith('/brand/')
   ) {
     return NextResponse.next();
   }

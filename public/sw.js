@@ -12,16 +12,19 @@
  * from the v1.3 PWA bundle. APP_SHELL paths and cache-first matcher are
  * adapted to the Next.js route /master-ops instead of the HTML filename.
  */
-const VERSION = 'acu-master-ops-v1.4.0-rc.1';
+const VERSION = 'acu-master-ops-v1.4.0-rc.2';
 const SHELL = 'shell::' + VERSION;
 const RUNTIME = 'runtime::' + VERSION;
 
 const APP_SHELL = [
   '/master-ops',
   '/manifest.webmanifest',
+  '/favicon.ico',
+  '/apple-touch-icon.png',
   '/icon-192.png',
   '/icon-512.png',
   '/icon-512-maskable.png',
+  '/brand/acuterium-logo.svg',
   '/sovereign-fonts.css'
 ];
 

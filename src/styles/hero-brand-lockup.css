@@ -1,0 +1,184 @@
+/* ─────────────────────────────────────────────────────────────────────
+ * Acuterium Master Ops · HeroBrandLockup
+ * Classification: ACUTERIUM-INTERNAL // SOVEREIGN
+ *
+ * Tokenised proportional sizing. The image fills a bounded frame
+ * (`.acu-hero-lockup__logo-frame`) sized via custom-property tokens —
+ * never via inline width/height in page code. Doctrinal alignment:
+ * D-08 visual extension · D-11 L5 Output Discipline.
+ * ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  --acu-hero-gap: 1rem;
+  --acu-hero-gap-lg: 1.25rem;
+  --acu-hero-max-width: 1100px;
+
+  --acu-hero-eyebrow-size: 0.78rem;
+  --acu-hero-title-size: clamp(2rem, 3.2vw, 3.4rem);
+  --acu-hero-subtitle-size: clamp(0.98rem, 1.2vw, 1.12rem);
+
+  --acu-hero-logo-compact: 72px;
+  --acu-hero-logo-standard: 96px;
+  --acu-hero-logo-prominent: 120px;
+
+  --acu-hero-logo-mobile-compact: 52px;
+  --acu-hero-logo-mobile-standard: 64px;
+  --acu-hero-logo-mobile-prominent: 80px;
+
+  --acu-hero-border: rgba(255, 255, 255, 0.08);
+  --acu-hero-text-muted: rgba(255, 255, 255, 0.72);
+  --acu-hero-surface: linear-gradient(
+    180deg,
+    rgba(7, 15, 24, 0.88),
+    rgba(10, 18, 30, 0.72)
+  );
+  --acu-hero-ring: rgba(0, 229, 212, 0.16);
+  --acu-hero-shadow: 0 12px 42px rgba(0, 0, 0, 0.22);
+}
+
+.acu-hero-lockup {
+  width: 100%;
+  display: block;
+}
+
+.acu-hero-lockup__content {
+  max-width: var(--acu-hero-max-width);
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 1rem;
+  border: 1px solid var(--acu-hero-border);
+  border-radius: 20px;
+  background: var(--acu-hero-surface);
+  box-shadow: var(--acu-hero-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.acu-hero-lockup__brand-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--acu-hero-gap-lg);
+}
+
+.acu-hero-lockup--start .acu-hero-lockup__brand-row {
+  justify-items: start;
+}
+
+.acu-hero-lockup--center .acu-hero-lockup__brand-row {
+  justify-items: center;
+}
+
+.acu-hero-lockup__logo-frame {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 50%, var(--acu-hero-ring), transparent 72%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.acu-hero-lockup--compact .acu-hero-lockup__logo-frame {
+  width: var(--acu-hero-logo-compact);
+  height: var(--acu-hero-logo-compact);
+}
+
+.acu-hero-lockup--standard .acu-hero-lockup__logo-frame {
+  width: var(--acu-hero-logo-standard);
+  height: var(--acu-hero-logo-standard);
+}
+
+.acu-hero-lockup--prominent .acu-hero-lockup__logo-frame {
+  width: var(--acu-hero-logo-prominent);
+  height: var(--acu-hero-logo-prominent);
+}
+
+.acu-hero-lockup__logo {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 8px 18px rgba(0, 229, 212, 0.12));
+}
+
+.acu-hero-lockup__text-block {
+  min-width: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.acu-hero-lockup__eyebrow {
+  margin: 0;
+  font-size: var(--acu-hero-eyebrow-size);
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acu-hero-text-muted);
+}
+
+.acu-hero-lockup__title {
+  margin: 0;
+  font-size: var(--acu-hero-title-size);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  max-width: 12ch;
+}
+
+.acu-hero-lockup__subtitle {
+  margin: 0;
+  font-size: var(--acu-hero-subtitle-size);
+  line-height: 1.5;
+  color: var(--acu-hero-text-muted);
+  max-width: 70ch;
+}
+
+.acu-hero-lockup__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+  color: var(--acu-hero-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 900px) {
+  .acu-hero-lockup__content {
+    padding: 1rem;
+  }
+  .acu-hero-lockup__brand-row {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .acu-hero-lockup__brand-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .acu-hero-lockup--compact .acu-hero-lockup__logo-frame {
+    width: var(--acu-hero-logo-mobile-compact);
+    height: var(--acu-hero-logo-mobile-compact);
+  }
+
+  .acu-hero-lockup--standard .acu-hero-lockup__logo-frame {
+    width: var(--acu-hero-logo-mobile-standard);
+    height: var(--acu-hero-logo-mobile-standard);
+  }
+
+  .acu-hero-lockup--prominent .acu-hero-lockup__logo-frame {
+    width: var(--acu-hero-logo-mobile-prominent);
+    height: var(--acu-hero-logo-mobile-prominent);
+  }
+
+  .acu-hero-lockup__title {
+    max-width: 14ch;
+  }
+
+  .acu-hero-lockup__subtitle {
+    max-width: 100%;
+  }
+}
