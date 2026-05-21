@@ -30,6 +30,8 @@ const BASE: Omit<KPI, 'trend'>[] = [
   {id:'K-18',name:'Dashboard published',source:'master-project.acuterium.ai',target:'LIVE',value:'LIVE',state:'achieved'},
   {id:'K-19',name:'Manus quarantine purge verified',source:'CI Manus-free check',target:'CLEAN',value:'PENDING',state:'off_track'},
   {id:'K-20',name:'Quarterly refresh cadence',source:'Day 90 scheduled',target:'SCHEDULED',value:'NOT-SCHEDULED',state:'at_risk'},
+  {id:'K-21',name:'Phase 1E QA pass rate',source:'Phase-1E-Final-Comprehensive-REPORT',target:'>=95%',value:'100% (48/48)',state:'achieved'},
+  {id:'K-22',name:'Phase 2 server-side CWH gate',source:'eND-Phase-2-REPORT',target:'27/27 tests',value:'27/27 + 16/16 preflight + 4/4 smoke',state:'achieved'},
 ];
 
 export const KPIS: KPI[] = BASE.map((k) => ({ ...k, trend: seedTrend(k.id, k.target) }));
