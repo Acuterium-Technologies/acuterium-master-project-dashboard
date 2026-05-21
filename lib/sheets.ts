@@ -177,6 +177,89 @@ export async function appendAuditLog(actor: string, action: string, target: stri
   }
 }
 
+// ─── Generic read/update (v1.4 data-adapter dispatch target) ──────────
+// Added in Phase 1A of v1.4 deployment. Existing per-tab functions above
+// remain unchanged for backward compatibility. The new generic surface
+// lets src/lib/data-adapter.ts dispatch to any tab without per-tab code.
+
+export async function readSheet<T = Record<string, string>>(
+  tab: string,
+  range = 'A2:Z'
+): Promise<T[]> {
+  try {
+    const sheets = getClient();
+    // Fetch header row separately so we can map columns by name
+    const headerRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: getSheetId(),
+      range: `${tab}!A1:Z1`
+    });
+    const headers = (headerRes.data.values?.[0] || []) as string[];
+    if (headers.length === 0) return [];
+
+    const dataRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: getSheetId(),
+      range: `${tab}!${range}`
+    });
+    const rows = dataRes.data.values || [];
+    return rows.map((r) => {
+      const obj: Record<string, string> = {};
+      headers.forEach((h, i) => {
+        obj[h] = r[i] != null ? String(r[i]) : '';
+      });
+      return obj as unknown as T;
+    });
+  } catch (e) {
+    console.error(`readSheet(${tab}) error:`, e);
+    return [];
+  }
+}
+
+export async function updateRow(
+  tab: string,
+  idColumn: string,
+  idValue: string,
+  patch: Record<string, string | number | boolean>
+): Promise<void> {
+  const sheets = getClient();
+  const headerRes = await sheets.spreadsheets.values.get({
+    spreadsheetId: getSheetId(),
+    range: `${tab}!A1:Z1`
+  });
+  const headers = (headerRes.data.values?.[0] || []) as string[];
+  if (headers.length === 0) throw new Error(`Tab ${tab} has no header row`);
+
+  const idCol = headers.indexOf(idColumn);
+  if (idCol === -1) throw new Error(`Column ${idColumn} not found in ${tab}`);
+
+  const dataRes = await sheets.spreadsheets.values.get({
+    spreadsheetId: getSheetId(),
+    range: `${tab}!A2:Z`
+  });
+  const rows = dataRes.data.values || [];
+  const rowIdx = rows.findIndex((r) => String(r[idCol] || '') === idValue);
+  if (rowIdx === -1) throw new Error(`Row ${idValue} not found in ${tab}`);
+
+  const sheetRow = rowIdx + 2; // sheet rows are 1-indexed; +1 for header
+  const colLetter = (n: number) => String.fromCharCode(65 + n);
+
+  for (const [field, value] of Object.entries(patch)) {
+    const col = headers.indexOf(field);
+    if (col === -1) continue; // silently ignore unknown columns
+    const v =
+      typeof value === 'boolean'
+        ? value
+          ? 'TRUE'
+          : 'FALSE'
+        : String(value);
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: getSheetId(),
+      range: `${tab}!${colLetter(col)}${sheetRow}`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [[v]] }
+    });
+  }
+}
+
 // ─── Bulk seeding (one-time setup) ─────────────────────────────────────
 
 export async function seedSheet(): Promise<{ matrix: number; tasks: number; milestones: number; kpis: number }> {

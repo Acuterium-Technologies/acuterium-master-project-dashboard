@@ -9,7 +9,7 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const from = searchParams.get('from') || '/';
+  const from = searchParams.get('from') || '/master-ops';
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

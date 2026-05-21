@@ -1,0 +1,44 @@
+/* ─────────────────────────────────────────────────────────────────────
+ * Acuterium Master Ops · Sovereign Self-Hosted Fonts
+ * Classification: ACUTERIUM-INTERNAL // SOVEREIGN
+ *
+ * Self-hosted woff2 files live in /fonts/. Downloaded at build time
+ * per the recipe in the workspace sovereign-fonts.css. No Google Fonts
+ * CDN in production — sovereign perimeter only.
+ * ───────────────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/sora-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/sora-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/cinzel-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/noto-kufi-arabic-400.woff2') format('woff2');
+}

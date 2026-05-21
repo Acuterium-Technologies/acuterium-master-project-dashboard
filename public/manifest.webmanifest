@@ -1,0 +1,26 @@
+{
+  "name": "Acuterium · Master Operations",
+  "short_name": "Master Ops",
+  "description": "Unified Master Operations Dashboard — Acuterium Technologies Inc. · Sovereign Doctrine Surface",
+  "start_url": "/master-ops",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#030509",
+  "theme_color": "#00E5D4",
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Overview",  "url": "/master-ops?section=overview"  },
+    { "name": "Channels",  "url": "/master-ops?section=channels"  },
+    { "name": "Decisions", "url": "/master-ops?section=decisions" },
+    { "name": "Doctrine",  "url": "/master-ops?section=doctrine"  }
+  ],
+  "prefer_related_applications": false
+}

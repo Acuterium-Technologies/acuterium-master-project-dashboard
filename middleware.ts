@@ -33,10 +33,20 @@ const COOKIE_NAME = 'acuterium-access';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // PWA carve-outs added in v1.4 Phase 1A — these must be reachable
+  // before the access cookie is set, otherwise the service worker
+  // can't install and the manifest/icons can't be fetched.
   if (
     pathname === '/login' ||
     pathname === '/api/login' ||
-    pathname === '/api/seed'
+    pathname === '/api/seed' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/sw.js' ||
+    pathname === '/icon-192.png' ||
+    pathname === '/icon-512.png' ||
+    pathname === '/icon-512-maskable.png' ||
+    pathname === '/sovereign-fonts.css' ||
+    pathname.startsWith('/fonts/')
   ) {
     return NextResponse.next();
   }
