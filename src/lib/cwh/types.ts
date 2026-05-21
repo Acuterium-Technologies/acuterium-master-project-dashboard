@@ -18,7 +18,23 @@
 import { z } from 'zod';
 
 // ─── ENUMS (canon · do not reorder) ─────────────────────────────────────
-export const CWH_TARGETS = ['task', 'milestone', 'od', 'residue'] as const;
+// Phase 3a · preflight rule 7.4 extends the target enum from 4 base values
+// to 4 base + 6 update variants. Update variants flow through the dedicated
+// /api/sheets/update route (Spec 3a.02). The Phase 2 evaluator strips the
+// '-update' suffix before matching rules, so existing CWH-R-01..CWH-R-12
+// continue to fire correctly for update targets.
+export const CWH_TARGETS = [
+  'task',
+  'milestone',
+  'od',
+  'residue',
+  'task-update',
+  'kpi-update',
+  'od-update',
+  'milestone-update',
+  'residue-update',
+  'surface-update',
+] as const;
 export type CWHTarget = (typeof CWH_TARGETS)[number];
 
 export const KAIROS_MODES_API = [
@@ -76,6 +92,9 @@ export const TransitionRequestSchema = z.object({
   toState: z.string().min(1).max(64),
   actor: ActorSchema,
   context: ContextSchema,
+  // Phase 3a · optional client-supplied idempotency key (Spec 3a.04).
+  // Format: 8-64 chars [a-zA-Z0-9_-] · MUST NEVER carry PII or session secrets.
+  idempotencyKey: z.string().regex(/^[a-zA-Z0-9_-]{8,64}$/).optional(),
 });
 
 export type TransitionRequest = z.infer<typeof TransitionRequestSchema>;
@@ -99,9 +118,15 @@ export type EvaluatorResult = {
   reason?: string;
 };
 
-// ─── ERROR ENVELOPE (401 · 403 · 429 · 500) ─────────────────────────────
+// ─── ERROR ENVELOPE (401 · 403 · 409 · 429 · 500) ───────────────────────
 export type ErrorResponse = {
   error: string;
-  code: 'UNAUTHENTICATED' | 'FORBIDDEN' | 'RATE_LIMITED' | 'INVALID_INPUT' | 'SERVER_ERROR';
+  code:
+    | 'UNAUTHENTICATED'
+    | 'FORBIDDEN'
+    | 'IDEMPOTENCY_COLLISION'
+    | 'RATE_LIMITED'
+    | 'INVALID_INPUT'
+    | 'SERVER_ERROR';
   requestId: string;
 };

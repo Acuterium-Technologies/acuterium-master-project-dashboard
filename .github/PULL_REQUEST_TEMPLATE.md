@@ -14,6 +14,18 @@
 - [ ] No Google Fonts CDN at runtime — self-host via `/fonts/` only.
 - [ ] Leak-fix middleware at `58b61d1` not regressed (carve-out list extended, not replaced).
 
+## Hero brand surface check (Phase 3a)
+
+If this PR touches `src/components/brand/`, `src/styles/hero-brand-lockup.css`, or any page rendering the hero:
+
+- [ ] Hero Logo QA Guardrail completed: [docs/qa/hero-logo-guardrail.md](../docs/qa/hero-logo-guardrail.md)
+- [ ] Playwright visual regression run locally: `npm run test:visual` (or `:update` if baselines intentionally moved)
+- [ ] Screenshot baselines under `tests/hero-brand.spec.ts-snapshots/` reflect the intended state
+
+If this PR does NOT touch the hero brand surface, tick this box: [ ] N/A — hero surface untouched
+
+---
+
 ## Hero Logo QA Guardrail
 
 ### Structural checks

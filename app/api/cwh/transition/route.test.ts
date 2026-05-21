@@ -13,6 +13,7 @@ import type { NextRequest } from 'next/server';
 
 import { cwhRateLimiter } from '../../../../src/lib/cwh/ratelimit';
 import { evaluateCWH } from '../../../../src/lib/cwh/evaluate';
+import { __resetIdempotencyForTests } from '../../../../src/lib/cwh/idempotency';
 import type { TransitionRequest, TransitionResponse } from '../../../../src/lib/cwh/types';
 import { POST } from './route';
 
@@ -61,11 +62,13 @@ describe('POST /api/cwh/transition · integration', () => {
   beforeEach(() => {
     vi.stubEnv('DASHBOARD_ACCESS_TOKEN', TOKEN);
     cwhRateLimiter.reset();
+    __resetIdempotencyForTests();
   });
 
   afterEach(() => {
     vi.unstubAllEnvs();
     cwhRateLimiter.reset();
+    __resetIdempotencyForTests();
   });
 
   it('401 when access cookie is missing', async () => {
@@ -169,5 +172,91 @@ describe('POST /api/cwh/transition · integration', () => {
       ids.add(json.auditId);
     }
     expect(ids.size).toBe(5);
+  });
+});
+
+// ─── Phase 3a · idempotency integration ────────────────────────────────
+describe('POST /api/cwh/transition · idempotency (Phase 3a.04)', () => {
+  beforeEach(() => {
+    vi.stubEnv('DASHBOARD_ACCESS_TOKEN', TOKEN);
+    cwhRateLimiter.reset();
+    __resetIdempotencyForTests();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    cwhRateLimiter.reset();
+    __resetIdempotencyForTests();
+  });
+
+  it('5 POSTs with same idempotencyKey → 1 audit row, 5 identical responses', async () => {
+    const key = 'idem-test-001-abcdef';
+    const body = payload({ idempotencyKey: key });
+    const responses: TransitionResponse[] = [];
+    const replayFlags: (string | null)[] = [];
+    for (let i = 0; i < 5; i++) {
+      const res = await POST(makeRequest({ cookie: TOKEN, body, ip: '10.7.0.' + (i + 1) }));
+      expect(res.status).toBe(200);
+      replayFlags.push(res.headers.get('X-Idempotency-Replay'));
+      responses.push((await res.json()) as TransitionResponse);
+    }
+    // First call is original; calls 2-5 are replays.
+    expect(replayFlags[0]).toBeNull();
+    expect(replayFlags.slice(1)).toEqual(['1', '1', '1', '1']);
+    // All 5 responses share the same auditId (only one audit row was written).
+    const auditIds = new Set(responses.map((r) => r.auditId));
+    expect(auditIds.size).toBe(1);
+  });
+
+  it('same key + DIFFERENT target → 409 IDEMPOTENCY_COLLISION', async () => {
+    const key = 'idem-collision-target-01';
+    await POST(makeRequest({ cookie: TOKEN, body: payload({ idempotencyKey: key, target: 'task' }), ip: '10.7.1.1' }));
+    const res = await POST(
+      makeRequest({
+        cookie: TOKEN,
+        body: payload({ idempotencyKey: key, target: 'milestone', fromState: 'open', toState: 'closed' }),
+        ip: '10.7.1.2',
+      }),
+    );
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.code).toBe('IDEMPOTENCY_COLLISION');
+    // Doctrinal red-line: key never appears in error response body.
+    expect(JSON.stringify(body)).not.toContain(key);
+  });
+
+  it('same key + DIFFERENT targetId → 409 IDEMPOTENCY_COLLISION', async () => {
+    const key = 'idem-collision-id-001-xy';
+    await POST(makeRequest({ cookie: TOKEN, body: payload({ idempotencyKey: key, targetId: 'T-AAA' }), ip: '10.7.2.1' }));
+    const res = await POST(
+      makeRequest({ cookie: TOKEN, body: payload({ idempotencyKey: key, targetId: 'T-BBB' }), ip: '10.7.2.2' }),
+    );
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.code).toBe('IDEMPOTENCY_COLLISION');
+  });
+
+  it('schema rejects too-short key (< 8 chars) with 400', async () => {
+    const bad = { ...payload(), idempotencyKey: 'short' };
+    const res = await POST(makeRequest({ cookie: TOKEN, body: bad }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.code).toBe('INVALID_INPUT');
+  });
+
+  it('schema rejects key with disallowed chars (spaces) with 400', async () => {
+    const bad = { ...payload(), idempotencyKey: 'has spaces here' };
+    const res = await POST(makeRequest({ cookie: TOKEN, body: bad }));
+    expect(res.status).toBe(400);
+  });
+
+  it('no idempotencyKey → existing behavior preserved (every POST = new audit)', async () => {
+    const ids = new Set<string>();
+    for (let i = 0; i < 3; i++) {
+      const res = await POST(makeRequest({ cookie: TOKEN, body: payload(), ip: '10.7.5.' + (i + 1) }));
+      const j = (await res.json()) as TransitionResponse;
+      ids.add(j.auditId);
+    }
+    expect(ids.size).toBe(3);
   });
 });

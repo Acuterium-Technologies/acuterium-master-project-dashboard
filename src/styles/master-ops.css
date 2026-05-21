@@ -23,12 +23,26 @@
   --text-muted: rgba(130,175,215,0.52); --text-ghost: rgba(100,145,185,0.38);
   --font-ui: 'Sora', system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace;
   --font-display: 'Cinzel', Georgia, serif;
-  --radius-lg: 18px; --radius-md: 12px; --radius-sm: 8px; --radius-pill: 100px;
+  --radius-lg: 22px; --radius-md: 12px; --radius-sm: 8px; --radius-pill: 100px;
   --t-fast: .18s ease; --t-base: .4s cubic-bezier(.4,0,.2,1);
   /* ─── KAIROS 6-MODE PHYSICS VARS (PATHOS overrides --breath-rate in JS) ─── */
   --breath-rate: 4.2s;
+  --breath-normal:   4.2s;
+  --breath-stressed: 2.8s;
+  --breath-calm:     4.8s;
+  --orb-drift:       14s;
   --particle-opacity: .55;
   --mode-tint: transparent;
+
+  /* ── GOVERNMENT EDITION (RUZN.AI · judicial · formal doc review) ── */
+  --bg-gov:              #B8D4E8;
+  --text-gov-primary:    #1A4F6A;
+  --text-gov-secondary:  #2F7090;
+  --text-gov-muted:      #6A9EB8;
+  --glass-gov-outer:     rgba(255, 255, 255, 0.42);
+  --glass-gov-panel:     rgba(255, 255, 255, 0.32);
+  --glass-gov-item:      rgba(255, 255, 255, 0.22);
+  --border-gov:          rgba(255, 255, 255, 0.60);
 }
 
 body.acu-master-ops {
@@ -83,6 +97,14 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
   font-family: var(--font-display); font-weight: 600; font-size: 13px;
   letter-spacing: .16em; color: var(--text-primary); text-transform: uppercase;
 }
+/* Phase 3a · base rules added before body.mode-gui overrides per preflight rule 7.16 */
+.glass-panel {
+  background: var(--glass-panel);
+  backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-cyan-bright); border-radius: var(--radius-md);
+  padding: 14px;
+}
+.text-muted { color: var(--text-muted); }
 .panel-title .kicker {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: .22em;
   color: var(--cyan-prime); background: rgba(0,229,212,.08);
@@ -513,21 +535,21 @@ body.mode-hud .card, body.mode-hud .surf { background: rgba(0,15,12,.50); border
 body.mode-hud #consciousness-orb { opacity: .30; }
 body.mode-hud .donut-center { fill: var(--cyan-prime); }
 
-/* ─── MODE: GUI CLASSIC (government) ───────────────────────────────── */
+/* ─── MODE: GUI CLASSIC (government · Phase 3a token-driven) ───────── */
 body.mode-gui {
-  background: #B8D4E8 !important; background-attachment: fixed;
-  color: #1A4F6A;
+  background: var(--bg-gov) !important; background-attachment: fixed;
+  color: var(--text-gov-primary);
 }
 body.mode-gui h1, body.mode-gui h2, body.mode-gui h3, body.mode-gui .hero h1 {
-  font-family: var(--font-display); font-weight: 600; color: #1A4F6A; letter-spacing: .04em;
-  background: none; -webkit-text-fill-color: #1A4F6A;
+  font-family: var(--font-display); font-weight: 600; color: var(--text-gov-primary); letter-spacing: .04em;
+  background: none; -webkit-text-fill-color: var(--text-gov-primary);
 }
-body.mode-gui .panel, body.mode-gui .card, body.mode-gui .surf {
-  background: rgba(255,255,255,.42); border: 1px solid rgba(255,255,255,.60);
-  color: #1A4F6A;
+body.mode-gui .panel, body.mode-gui .glass-panel, body.mode-gui .card, body.mode-gui .surf {
+  background: var(--glass-gov-panel); border: 1px solid var(--border-gov);
+  color: var(--text-gov-secondary);
 }
-body.mode-gui .panel-title { color: #1A4F6A; }
-body.mode-gui .muted, body.mode-gui .sm.muted { color: #6A9EB8; }
+body.mode-gui .panel-title, body.mode-gui .text-muted { color: var(--text-gov-muted); }
+body.mode-gui .muted, body.mode-gui .sm.muted { color: var(--text-gov-muted); }
 body.mode-gui .mono, body.mode-gui .panel-title .kicker { color: #2F7090; }
 body.mode-gui .metric .val, body.mode-gui .donut-center { color: #2F7090 !important; fill: #2F7090; }
 body.mode-gui .kpi .kv { color: #2F7090; }

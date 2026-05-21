@@ -91,3 +91,49 @@ export async function appendAuditEntry(entry: AuditEntry): Promise<AuditEntry> {
 
   return entry;
 }
+
+// ── Phase 3a · Postgres durable mirror ─────────────────────────────────
+//
+// Belt-and-suspenders during the transition: JSONL stays canonical until
+// every consumer reads from Postgres. If POSTGRES_URL is unset, this is a
+// no-op (graceful degradation per Spec 3a.01).
+//
+// Failure to write to Postgres MUST NOT block the HTTP response. The route
+// handler calls this AFTER appendAuditEntry, awaits both, and reports the
+// transition verdict regardless of Postgres outcome.
+export async function appendAuditPostgres(entry: AuditEntry): Promise<{
+  ok: boolean;
+  reason?: string;
+}> {
+  if (!process.env.POSTGRES_URL) {
+    return { ok: false, reason: 'POSTGRES_URL unset · JSONL-only mode' };
+  }
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    return { ok: false, reason: 'edge runtime · @vercel/postgres requires nodejs' };
+  }
+
+  try {
+    const { sql } = await import('@vercel/postgres');
+    await sql`
+      INSERT INTO audit_log (
+        audit_id, ts, actor_session, target, target_id,
+        from_state, to_state, verdict, rule_id, doctrine_delta,
+        reason, raw_request, channel
+      )
+      VALUES (
+        ${entry.auditId}, ${entry.timestamp}, ${entry.request.actor.session},
+        ${entry.request.target}, ${entry.request.targetId},
+        ${entry.request.fromState}, ${entry.request.toState},
+        ${entry.verdict}, ${entry.ruleId}, ${entry.doctrineDelta},
+        ${entry.reason ?? null}, ${JSON.stringify(entry.request)}::jsonb,
+        'CH-2'
+      )
+      ON CONFLICT (audit_id) DO NOTHING;
+    `;
+    return { ok: true };
+  } catch (err) {
+    // NEVER throw — JSONL remains the canonical record until Postgres confirms.
+    console.error('[auditlog:postgres] write failed, JSONL remains canonical', err);
+    return { ok: false, reason: String(err) };
+  }
+}

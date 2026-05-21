@@ -65,6 +65,14 @@ npm run dev
 
 Visit http://localhost:3000.
 
+## QA & Compliance Documentation
+
+- [Hero Logo QA Guardrail](docs/qa/hero-logo-guardrail.md) — PR-review gate for hero brand surface changes (closes F-07)
+- [Phase 3a Spec Bundle](specs/3a/README.md) — Foundation + QA-tooling baseline (v1.5.0-alpha.1)
+- [Phase 3 Master Scope](specs/00-phase-3-master-scope-v3.0.md)
+
+Automated counterpart for the hero guardrail: `tests/hero-brand.spec.ts` (Playwright, 5 viewports). Run via `npm run test:visual`.
+
 ## License
 
 Proprietary — Acuterium Technologies Inc. · Muscat, Sultanate of Oman

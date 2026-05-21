@@ -4,6 +4,15 @@ End-to-end instructions to take this scaffolding from your local disk to a live,
 
 **Total time estimate:** 4–7 hours for an operator familiar with the tools involved; 6–10 hours if any of GCP/Vercel/DNS is new.
 
+## Pre-deployment checklist (Phase 3a additions)
+
+- [ ] If hero brand surface was touched, hero logo QA guardrail run: [docs/qa/hero-logo-guardrail.md](docs/qa/hero-logo-guardrail.md)
+- [ ] If Postgres is provisioned, set `POSTGRES_URL` + `POSTGRES_URL_NON_POOLING` and run `npm run migrate:auditlog` once
+- [ ] If Sheets adapter is in use, set `GOOGLE_SHEET_ID`, `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY`
+- [ ] For Playwright CI: add `PLAYWRIGHT_TEST_TOKEN` to the GitHub repo secrets (repo-scoped, NOT org-wide), and set the `PLAYWRIGHT_VISUAL_ENABLED=true` repo variable
+- [ ] For Blob backup of AuditLog JSONL: set `AUDIT_BLOB_BACKUP_ENABLED=true` and provision `BLOB_READ_WRITE_TOKEN`
+- [ ] Bootstrap Playwright baselines locally: `DASHBOARD_ACCESS_TOKEN=<token> npm run test:visual:update` then commit the 5 generated PNG snapshots under `tests/hero-brand.spec.ts-snapshots/`. Required ONLY before first CI run of the visual-regression job.
+
 **Prerequisites before you start:**
 - Node.js 20+ installed
 - Git installed and `gh auth status` shows you're logged in

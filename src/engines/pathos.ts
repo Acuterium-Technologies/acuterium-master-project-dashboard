@@ -69,8 +69,20 @@ export function computePATHOS({ nexus, profile, persisted }: ComputePathosArgs):
   };
 }
 
+/**
+ * Phase 3a · named breath-rate tokens.
+ * Three discrete bands map to the ACAI V2 canon tokens (--breath-normal,
+ * --breath-stressed, --breath-calm). The continuous 4.8s→2.8s formula
+ * used in Phase 1D is replaced with these named bands so designers can
+ * adjust the three values in one place (src/styles/master-ops.css :root).
+ */
+export function computeBreathRate(pathos: PathosState): string {
+  if (pathos.stress > 70) return 'var(--breath-stressed)';
+  if (pathos.stress < 30) return 'var(--breath-calm)';
+  return 'var(--breath-normal)';
+}
+
 export function applyBreathing(pathos: PathosState): void {
   if (typeof document === 'undefined') return;
-  const rate = 4.8 - (pathos.stress / 100) * 2.0;
-  document.documentElement.style.setProperty('--breath-rate', rate.toFixed(2) + 's');
+  document.documentElement.style.setProperty('--breath-rate', computeBreathRate(pathos));
 }

@@ -23,8 +23,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-import { appendAuditEntry, newAuditId, type AuditEntry } from '../../../../src/lib/cwh/auditlog';
+import {
+  appendAuditEntry,
+  appendAuditPostgres,
+  newAuditId,
+  type AuditEntry,
+} from '../../../../src/lib/cwh/auditlog';
 import { evaluateCWH } from '../../../../src/lib/cwh/evaluate';
+import {
+  checkIdempotency,
+  storeIdempotency,
+} from '../../../../src/lib/cwh/idempotency';
 import { cwhRateLimiter } from '../../../../src/lib/cwh/ratelimit';
 import {
   TransitionRequestSchema,
@@ -126,6 +135,29 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
   }
 
+  // ── 3a. Idempotency check (Phase 3a · spec 04) ─────────────────────
+  // Cache hit (same key + same tuple) → return verbatim, no new audit row.
+  // Cache hit (same key + different tuple) → 409 collision.
+  // Cache miss → proceed and cache the response below.
+  const idemKey = parsed.data.idempotencyKey;
+  if (idemKey) {
+    const check = checkIdempotency(idemKey, parsed.data.target, parsed.data.targetId);
+    if (check.match === 'hit') {
+      return NextResponse.json(check.cached, {
+        status: 200,
+        headers: { 'Cache-Control': 'no-store', 'X-Request-Id': requestId, 'X-Idempotency-Replay': '1' },
+      });
+    }
+    if (check.match === 'collision') {
+      // NEVER leak the key itself in the response body — only the code.
+      return errorResponse(409, {
+        error: 'idempotency key collision · same key used for a different (target, targetId) tuple',
+        code: 'IDEMPOTENCY_COLLISION',
+        requestId,
+      });
+    }
+  }
+
   // ── 4. Evaluate ────────────────────────────────────────────────────
   const result = evaluateCWH(parsed.data);
 
@@ -142,7 +174,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     reason: result.reason,
   };
 
-  await appendAuditEntry(entry);
+  // Belt-and-suspenders: JSONL is canonical; Postgres is the durable mirror.
+  // Both run in parallel; neither throws on failure.
+  await Promise.all([
+    appendAuditEntry(entry),
+    appendAuditPostgres(entry),
+  ]);
 
   // ── 6. Telemetry ───────────────────────────────────────────────────
   console.info(
@@ -167,6 +204,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     auditId,
     timestamp,
   };
+
+  // Cache for future replays of the same key+tuple.
+  if (idemKey) {
+    storeIdempotency(idemKey, parsed.data.target, parsed.data.targetId, response);
+  }
 
   return NextResponse.json(response, {
     status: 200,
