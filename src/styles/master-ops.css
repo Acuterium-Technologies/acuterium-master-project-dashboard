@@ -25,6 +25,10 @@
   --font-display: 'Cinzel', Georgia, serif;
   --radius-lg: 18px; --radius-md: 12px; --radius-sm: 8px; --radius-pill: 100px;
   --t-fast: .18s ease; --t-base: .4s cubic-bezier(.4,0,.2,1);
+  /* ─── KAIROS 6-MODE PHYSICS VARS (PATHOS overrides --breath-rate in JS) ─── */
+  --breath-rate: 4.2s;
+  --particle-opacity: .55;
+  --mode-tint: transparent;
 }
 
 body.acu-master-ops {
@@ -43,12 +47,25 @@ body.acu-master-ops ::-webkit-scrollbar { width: 8px; height: 8px; }
 body.acu-master-ops ::-webkit-scrollbar-thumb { background: rgba(0,229,212,0.18); border-radius: 4px; }
 body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
 
-#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .55; }
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: var(--particle-opacity); }
+
+/* ─── BREATHING ORB — lives behind every mode ──────────────────────── */
 #consciousness-orb {
   position: fixed; left: 50%; top: 42%; transform: translate(-50%,-50%);
   width: 420px; height: 420px; border-radius: 50%; pointer-events: none; z-index: 1;
   background: radial-gradient(circle, rgba(0,229,212,.16) 0%, rgba(123,104,238,.08) 50%, transparent 72%);
-  filter: blur(8px); opacity: .85;
+  filter: blur(8px);
+  animation: orbBreathe var(--breath-rate) ease-in-out infinite,
+             orbDrift 14s ease-in-out infinite alternate;
+  opacity: .85;
+}
+@keyframes orbBreathe {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: .6; }
+  50% { transform: translate(-50%,-50%) scale(1.08); opacity: .92; }
+}
+@keyframes orbDrift {
+  0% { margin-left: 0; margin-top: 0; }
+  100% { margin-left: 42px; margin-top: -26px; }
 }
 
 /* ─── LAYOUT ───────────────────────────────────────────────────────── */
@@ -319,3 +336,173 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
   .task-card { padding: 10px; min-height: 44px; }
   .chk { width: 18px; height: 18px; }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+ * KAIROS 6-MODE PHYSICS · ported from v1.3 HTML lines 330-485
+ * Mounted by useKAIROS — swaps body.mode-{aui,tuui,hud,gui,dashboard,ambient}
+ * Engine layer (PATHOS sidebar · TELOS panel · mode toast) lives here
+ * because it ships only when the engines mount, not with the structural CSS.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ─── PATHOS SIDEBAR (collapsible) ─────────────────────────────────── */
+#pathos-bar {
+  position: fixed; right: 14px; top: 78px; z-index: 40;
+  width: 54px; padding: 10px 8px; border-radius: 30px;
+  background: var(--glass-panel); backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-cyan-mid);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: width .3s var(--t-base), padding .3s var(--t-base);
+  font-family: var(--font-mono);
+}
+#pathos-bar:hover, #pathos-bar.expanded { width: 188px; padding: 14px 14px; }
+.pathos-axis { display: flex; align-items: center; gap: 8px; width: 100%; cursor: default; }
+.pathos-axis .pa-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 6px currentColor; }
+.pathos-axis .pa-bar { height: 4px; flex: 1; background: rgba(0,229,212,.07); border-radius: 2px; position: relative; display: none; }
+.pathos-axis .pa-bar .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: currentColor; transition: width .6s var(--t-base); }
+.pathos-axis .pa-lab { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; display: none; white-space: nowrap; }
+.pathos-axis .pa-val { font-size: 10px; display: none; font-weight: 600; }
+#pathos-bar:hover .pa-bar, #pathos-bar.expanded .pa-bar,
+#pathos-bar:hover .pa-lab, #pathos-bar.expanded .pa-lab,
+#pathos-bar:hover .pa-val, #pathos-bar.expanded .pa-val { display: inline-flex; }
+#pathos-bar:hover .pa-bar, #pathos-bar.expanded .pa-bar { display: block; }
+.pathos-header { font-size: 8px; letter-spacing: .22em; color: var(--cyan-prime); opacity: 0; transition: opacity .3s; text-align: center; width: 100%; }
+#pathos-bar:hover .pathos-header, #pathos-bar.expanded .pathos-header { opacity: 1; }
+
+@media (max-width: 680px) {
+  #pathos-bar { display: none; }  /* mobile uses TELOS only — less clutter */
+}
+
+/* ─── TELOS PANEL (floating right side) ────────────────────────────── */
+#telos-panel {
+  position: fixed; right: 14px; bottom: 14px; z-index: 40;
+  width: 300px; max-width: calc(100vw - 28px);
+  background: var(--glass-panel); backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-cyan-bright); border-radius: var(--radius-lg);
+  padding: 12px 14px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  font-family: var(--font-ui);
+  transition: transform .3s var(--t-base), opacity .3s;
+}
+#telos-panel.collapsed { transform: translateY(calc(100% - 38px)); }
+.telos-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
+.telos-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: .22em; color: var(--violet-qenc); }
+.telos-pred { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.telos-pred .row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.telos-pred .pred-id { font-family: var(--font-mono); font-size: 9px; color: var(--gold-prime); letter-spacing: .06em; }
+.telos-pred .pred-conf { font-family: var(--font-mono); font-size: 9px; color: var(--cyan-prime); }
+.telos-pred .pred-title { font-size: 12px; color: var(--text-primary); line-height: 1.35; }
+.telos-pred .pred-meter { height: 3px; background: rgba(123,104,238,.10); border-radius: 2px; overflow: hidden; }
+.telos-pred .pred-meter .fill { height: 100%; background: linear-gradient(90deg, var(--violet-qenc), var(--cyan-prime)); transition: width .6s var(--t-base); }
+
+/* ─── MODE TOAST ───────────────────────────────────────────────────── */
+.mode-toast {
+  position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); z-index: 9999;
+  background: var(--glass-panel); backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-cyan-bright); border-radius: var(--radius-pill);
+  padding: 8px 18px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em;
+  color: var(--cyan-prime); animation: toastIn .3s ease, toastOut .3s ease 2.4s forwards;
+  text-transform: uppercase;
+}
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes toastOut { to { opacity: 0; transform: translate(-50%, 10px); } }
+
+/* ─── MODE: AUI GLASS (default) ────────────────────────────────────── */
+/* AUI uses the default body styling already declared above */
+
+/* ─── MODE: TUUI TACTILE ───────────────────────────────────────────── */
+body.mode-tuui { cursor: default; }
+body.mode-tuui .panel, body.mode-tuui .card, body.mode-tuui .surf {
+  background: rgba(13,18,53,.78); /* solid tactile surfaces */
+  border-width: 2px;
+}
+body.mode-tuui .pill, body.mode-tuui .mode-btn, body.mode-tuui .btn, body.mode-tuui .task-card {
+  min-height: 48px; padding: 12px 16px;
+}
+body.mode-tuui .chk { width: 22px; height: 22px; }
+body.mode-tuui .task-card { padding: 14px; }
+.tuui-target { position: relative; overflow: hidden; }
+.tuui-ripple { position: absolute; border-radius: 50%; background: rgba(0,229,212,.32); transform: scale(0); animation: tuuiRipple .65s linear; pointer-events: none; }
+@keyframes tuuiRipple { to { transform: scale(4); opacity: 0; } }
+
+/* ─── MODE: HUD OVERLAY ────────────────────────────────────────────── */
+body.mode-hud {
+  background: #000A08 !important; background-attachment: fixed;
+  font-family: var(--font-mono);
+}
+body.mode-hud::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  background: repeating-linear-gradient(0deg, rgba(0,229,212,.05) 0px, rgba(0,229,212,.05) 1px, transparent 1px, transparent 3px);
+}
+body.mode-hud .panel { background: rgba(0,15,12,.65); border-color: rgba(0,229,212,.40); border-radius: 6px; }
+body.mode-hud .panel-title { color: var(--cyan-prime); text-shadow: 0 0 8px rgba(0,229,212,.4); }
+body.mode-hud .hero h1 {
+  font-family: var(--font-mono); font-weight: 400; font-size: clamp(20px, 3vw, 30px);
+  background: none; -webkit-text-fill-color: var(--cyan-prime); color: var(--cyan-prime);
+  letter-spacing: .20em; text-transform: uppercase;
+}
+body.mode-hud .card, body.mode-hud .surf { background: rgba(0,15,12,.50); border-radius: 6px; }
+body.mode-hud #consciousness-orb { opacity: .30; }
+body.mode-hud .donut-center { fill: var(--cyan-prime); }
+
+/* ─── MODE: GUI CLASSIC (government) ───────────────────────────────── */
+body.mode-gui {
+  background: #B8D4E8 !important; background-attachment: fixed;
+  color: #1A4F6A;
+}
+body.mode-gui h1, body.mode-gui h2, body.mode-gui h3, body.mode-gui .hero h1 {
+  font-family: var(--font-display); font-weight: 600; color: #1A4F6A; letter-spacing: .04em;
+  background: none; -webkit-text-fill-color: #1A4F6A;
+}
+body.mode-gui .panel, body.mode-gui .card, body.mode-gui .surf {
+  background: rgba(255,255,255,.42); border: 1px solid rgba(255,255,255,.60);
+  color: #1A4F6A;
+}
+body.mode-gui .panel-title { color: #1A4F6A; }
+body.mode-gui .muted, body.mode-gui .sm.muted { color: #6A9EB8; }
+body.mode-gui .mono, body.mode-gui .panel-title .kicker { color: #2F7090; }
+body.mode-gui .metric .val, body.mode-gui .donut-center { color: #2F7090 !important; fill: #2F7090; }
+body.mode-gui .kpi .kv { color: #2F7090; }
+body.mode-gui .pill.active { background: rgba(47,112,144,.18); border-color: #2F7090; color: #1A4F6A; }
+body.mode-gui .bar { background: rgba(255,255,255,.55); border-bottom-color: rgba(0,0,0,.08); }
+body.mode-gui .brand-name, body.mode-gui .brand-tag { color: #1A4F6A; }
+body.mode-gui .mode-btn { color: rgba(26,79,106,.65); }
+body.mode-gui .mode-btn.active { background: rgba(47,112,144,.16); border-color: #2F7090; color: #1A4F6A; }
+body.mode-gui .chip, body.mode-gui .chip.green, body.mode-gui .chip.gold { background: rgba(47,112,144,.10); color: #1A4F6A; border-color: rgba(47,112,144,.30); }
+body.mode-gui #consciousness-orb, body.mode-gui #bg-canvas { display: none; }
+body.mode-gui * { animation-duration: .01ms !important; transition-duration: var(--t-fast) !important; }
+body.mode-gui .pa-dot { box-shadow: none; }
+body.mode-gui .hero p { color: #2F7090; opacity: .85; }
+body.mode-gui #telos-panel { background: rgba(255,255,255,.78); border-color: rgba(47,112,144,.40); }
+body.mode-gui #telos-panel .telos-title { color: #2F7090; }
+body.mode-gui #telos-panel .pred-title { color: #1A4F6A; }
+body.mode-gui #telos-panel .pred-id { color: #8B6F2A; }
+body.mode-gui #telos-panel .pred-conf { color: #2F7090; }
+body.mode-gui #telos-panel .pred-meter { background: rgba(47,112,144,.10); }
+body.mode-gui #telos-panel .muted { color: #6A9EB8; }
+body.mode-gui #pathos-bar { background: rgba(255,255,255,.60); border-color: rgba(47,112,144,.30); }
+body.mode-gui .pathos-header { color: #2F7090; }
+body.mode-gui #nexus-chip { background: rgba(47,112,144,.10); border-color: rgba(47,112,144,.30); color: #1A4F6A; }
+body.mode-gui #nexus-chip .dot { background: #2F7090; box-shadow: none; }
+
+/* ─── MODE: DASHBOARD (data-dense) ─────────────────────────────────── */
+body.mode-dashboard #consciousness-orb { opacity: .20; }
+body.mode-dashboard #bg-canvas { opacity: .18; }
+body.mode-dashboard .hero { padding: 8px 4px; }
+body.mode-dashboard .hero h1 { font-size: clamp(20px, 2vw, 26px); }
+body.mode-dashboard .panel { padding: 12px; }
+body.mode-dashboard .panel-title { font-size: 11px; }
+body.mode-dashboard .metric .val { font-size: 26px; }
+body.mode-dashboard .kpi { padding: 10px; }
+body.mode-dashboard .kpi .kn { min-height: 24px; font-size: 11px; }
+body.mode-dashboard .kpi .kv { font-size: 18px; }
+
+/* ─── MODE: AMBIENT ────────────────────────────────────────────────── */
+body.mode-ambient { background: #000408 !important; background-attachment: fixed; }
+body.mode-ambient #consciousness-orb { width: 640px; height: 640px; opacity: 1; }
+body.mode-ambient #bg-canvas { opacity: 1; }
+body.mode-ambient .panel, body.mode-ambient #pathos-bar, body.mode-ambient #telos-panel { opacity: .12; transition: opacity .6s var(--t-base); }
+body.mode-ambient .bar { opacity: .40; }
+body.mode-ambient .panel:hover, body.mode-ambient #pathos-bar:hover, body.mode-ambient #telos-panel:hover { opacity: 1; }
+body.mode-ambient .hero h1 { opacity: .55; }
