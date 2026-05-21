@@ -17,7 +17,7 @@
  */
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { assertHeroLogoSize, type HeroBrandVariant } from '../../lib/brand/heroBrandGuardrail';
 
@@ -28,6 +28,12 @@ export type HeroBrandLockupProps = {
   logoAlt?: string;
   eyebrow?: string;
   title: string;
+  /**
+   * Optional canonical 3-word triplet for cold-load stagger reveal.
+   * Phase 3c.04 · cold load only via sessionStorage key 'acu-hero-revealed'.
+   * When unset, the title renders as a single string (no stagger).
+   */
+  staggerWords?: readonly string[];
   subtitle?: string;
   meta?: ReactNode;
   variant?: HeroBrandVariant;
@@ -36,12 +42,14 @@ export type HeroBrandLockupProps = {
 };
 
 const DEFAULT_LOGO_SRC = '/brand/acuterium-logo.svg';
+const HERO_REVEALED_KEY = 'acu-hero-revealed';
 
 export function HeroBrandLockup({
   logoSrc = DEFAULT_LOGO_SRC,
   logoAlt = 'Acuterium logo',
   eyebrow = 'Acuterium Master Operations',
   title,
+  staggerWords,
   subtitle,
   meta,
   variant = 'compact',
@@ -49,10 +57,36 @@ export function HeroBrandLockup({
   className,
 }: HeroBrandLockupProps) {
   const logoFrameRef = useRef<HTMLDivElement | null>(null);
+  const [shouldStagger, setShouldStagger] = useState(false);
 
   useEffect(() => {
     assertHeroLogoSize(logoFrameRef.current);
   }, [variant]);
+
+  useEffect(() => {
+    if (!staggerWords || staggerWords.length === 0) return;
+    if (typeof window === 'undefined') return;
+
+    const reducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+
+    let alreadyRevealed = false;
+    try {
+      alreadyRevealed = window.sessionStorage.getItem(HERO_REVEALED_KEY) === '1';
+    } catch {
+      alreadyRevealed = false;
+    }
+    if (alreadyRevealed) return;
+
+    setShouldStagger(true);
+    try {
+      window.sessionStorage.setItem(HERO_REVEALED_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+  }, [staggerWords]);
 
   const classes = [
     'acu-hero-lockup',
@@ -62,6 +96,8 @@ export function HeroBrandLockup({
   ]
     .filter(Boolean)
     .join(' ');
+
+  const showStagger = !!staggerWords && staggerWords.length > 0 && shouldStagger;
 
   return (
     <section className={classes} data-qa="hero-lockup" data-qa-variant={variant}>
@@ -84,7 +120,26 @@ export function HeroBrandLockup({
             ) : null}
 
             <h1 className="acu-hero-lockup__title" data-qa="hero-title">
-              {title}
+              {showStagger ? (
+                <span
+                  className="acu-hero-stagger"
+                  data-qa="hero-stagger"
+                  aria-label={title}
+                >
+                  {staggerWords!.map((word, i) => (
+                    <span
+                      key={`${word}-${i}`}
+                      className="acu-hero-word"
+                      data-delay={i}
+                      style={{ animationDelay: `${0.2 + i * 0.3}s` }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </span>
+              ) : (
+                title
+              )}
             </h1>
 
             {subtitle ? (

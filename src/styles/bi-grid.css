@@ -426,3 +426,68 @@ body.mode-dashboard > nav.bar {
     display: none;
   }
 }
+
+/* ═══ MOE Matrix Full · Phase 3c.05 (F-13 cleanup) ═══
+ * Activates inside the BI grid center column when ?dashboard=moe is set.
+ * Reuses Phase 3b SSE channel — no new endpoints.
+ */
+.acu-moe-full {
+  position: relative;
+  background: var(--glass-panel);
+  border: 1px solid var(--border-cyan-mid);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.acu-moe-full__header {
+  margin-bottom: 12px;
+}
+.acu-moe-full__header h2 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--cyan-prime);
+  margin: 0 0 8px;
+}
+.acu-moe-full__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.acu-moe-full__total {
+  color: var(--cyan-prime);
+}
+.acu-moe-full__domain-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.acu-moe-full__domain-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-sm);
+}
+.acu-moe-full canvas {
+  cursor: crosshair;
+  background: rgba(0, 0, 0, 0.20);
+  border-radius: var(--radius-md);
+  width: 100%;
+  display: block;
+}
+.acu-moe-full__tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-cyan-bright);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--cyan-prime);
+  white-space: nowrap;
+  z-index: 10;
+}

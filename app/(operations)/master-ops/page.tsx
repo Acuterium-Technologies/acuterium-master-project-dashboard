@@ -40,6 +40,7 @@ import {
   computeTELOS,
   TelosPanel,
 } from '../../../src/engines';
+import { useChronos } from '../../../src/engines/chronos';
 import type { MnemosProfile, KairosMode } from '../../../src/engines';
 import {
   OverviewMode,
@@ -63,7 +64,9 @@ import type { ResidueVerdict } from '../../../src/data/types';
 
 // Phase 3b · Dashboard-mode BI grid + write-back drawer
 import { BIGrid } from '../../../src/components/dashboard/BIGrid';
+import { ChronosLabel } from '../../../src/components/dashboard/ChronosLabel';
 import { EditDrawer } from '../../../src/components/dashboard/EditDrawer';
+import { MOEMatrixFull } from '../../../src/components/dashboard/MOEMatrixFull';
 import { SPEC_BY_TARGET, type UpdateTarget } from '../../../src/lib/dashboard/edit-specs';
 
 import '../../../src/styles/master-ops.css';
@@ -100,6 +103,9 @@ const KAIROS_MODE_PILLS: ReadonlyArray<{ id: KairosMode; label: string; hint: st
   { id: 'ambient', label: 'AMB', hint: 'organism' },
 ];
 
+// Phase 3c.04 · canonical 3-word hero stagger (cold-load reveal).
+const HERO_STAGGER_WORDS = ['MASTER', 'OPERATIONS', 'ACUTERIUM'] as const;
+
 function isSectionId(v: string | null): v is SectionId {
   return v != null && SECTIONS.some((s) => s.id === v);
 }
@@ -129,8 +135,17 @@ function MasterOpsApp() {
     };
   }, []);
 
-  // Particle canvas (lives at #bg-canvas).
-  useParticles('bg-canvas');
+  // Phase 3c.01 · CHRONOS temporal adaptation — sets --chronos-gradient
+  // on documentElement and re-evaluates every 10 minutes. GCC locales
+  // (ar-OM/SA/AE/QA/BH) get the 6 prayer-time periods; others get the
+  // 6 standard time-of-day periods. The hook returns state for downstream
+  // labels (TopStrip) and the body background reads the CSS variable.
+  useChronos();
+
+  // Particle canvas (lives at #bg-canvas) · Phase 3c.03 reads KAIROS mode
+  // for density variance + 200 hard cap. The hook bootstraps from 'aui' and
+  // the mode-change effect below repaints particles in place when KAIROS
+  // resolves the persisted dominantMode.
 
   // Persisted state (tasks · milestones · OD closures · residue verdict).
   const persisted = usePersistedState();
@@ -151,6 +166,10 @@ function MasterOpsApp() {
     return isSectionId(q) ? q : 'overview';
   })();
   const [section, setSection] = useState<SectionId>(initialSection);
+
+  // Phase 3c.05 · ?dashboard=moe swaps the Dashboard-mode center canvas
+  // for the full MOE Expert Activation Matrix renderer (F-13 cleanup).
+  const showMOEFull = searchParams?.get('dashboard') === 'moe';
 
   // ── LIVING-INTERFACE ENGINES (NEXUS → PATHOS → KAIROS → TELOS → MNEMOS) ──
   const [profile, setProfile] = useState<MnemosProfile>(() => MNEMOS.load());
@@ -181,6 +200,10 @@ function MasterOpsApp() {
 
   const kairos = useKAIROS({ nexus, pathos, profile, setProfile });
   useTUUIRipples(kairos.mode);
+
+  // Phase 3c.03 · particle density reads KAIROS mode for per-mode multipliers
+  // (Ambient 3× · HUD 0.3× · etc.) with the 200 hard cap.
+  useParticles('bg-canvas', kairos.mode);
 
   const predictions = useMemo(
     () =>
@@ -521,6 +544,7 @@ function MasterOpsApp() {
               {km.label}
             </button>
           ))}
+          <ChronosLabel variant="compact" />
           <span
             id="nexus-chip"
             title={`NEXUS · mouse ${nexus.mouseVel}px/s · scroll ${nexus.scrollVel}px/s · idle ${nexus.idleSeconds}s${nexus.hasTouch ? ' · touch' : ''}`}
@@ -568,6 +592,7 @@ function MasterOpsApp() {
           variant="compact"
           eyebrow="Acuterium Master Operations"
           title="Master Operations · Acuterium"
+          staggerWords={HERO_STAGGER_WORDS}
           subtitle={`${META.classification} · ${META.doctrine}`}
         />
 
@@ -639,7 +664,7 @@ function MasterOpsApp() {
           onSectionChange={(s) => isSectionId(s) && setSection(s)}
           currentSection={section}
         >
-          {sectionContent}
+          {showMOEFull ? <MOEMatrixFull /> : sectionContent}
         </BIGrid>
       )}
 

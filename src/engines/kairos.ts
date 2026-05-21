@@ -37,6 +37,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { MNEMOS } from './mnemos';
+import { attachTUUIRipples } from './tuui-ripple';
+import { startTUUIDetector, TUUI_AUTO_SWITCH_EVENT } from './tuui-detector';
 import { KAIROS_MODES, MODE_LABELS } from './types';
 import type { KairosMode, MnemosProfile, NexusSignals, PathosState } from './types';
 
@@ -150,6 +152,23 @@ export function useKAIROS({
     return () => window.removeEventListener('keydown', onKey);
   }, [apply]);
 
+  // Phase 3c.02 · external auto-switch event (e.g. the TUUI detector
+  // dispatches { mode: 'tuui', source: 'nexus' } after idle + coarse-pointer
+  // detection). Treated as a 'kairos' source so the mode toast fires too.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onAutoSwitch = (e: Event) => {
+      const detail = (e as CustomEvent<{ mode?: KairosMode }>).detail;
+      const m = detail?.mode;
+      if (!m) return;
+      if (!KAIROS_MODES.includes(m)) return;
+      if (modeRef.current === m) return;
+      apply(m, 'kairos');
+    };
+    window.addEventListener(TUUI_AUTO_SWITCH_EVENT, onAutoSwitch);
+    return () => window.removeEventListener(TUUI_AUTO_SWITCH_EVENT, onAutoSwitch);
+  }, [apply]);
+
   /* SINGLE long-lived auto-switch interval. Mounts once, reads refs.
      8-second throttle prevents flicker. */
   useEffect(() => {
@@ -194,33 +213,28 @@ export function useKAIROS({
   };
 }
 
-export function useTUUIRipples(mode: KairosMode): void {
+/**
+ * Phase 3c.02 · TUUI ripple physics + idle/coarse auto-activation.
+ *
+ * Delegates to the new modules:
+ *   src/engines/tuui-ripple.ts   — global touchstart + click listener pair,
+ *                                  fires .tuui-ripple spans only when
+ *                                  body.mode-tuui is set (auto-cleanup on
+ *                                  `animationend`, 600 ms cubic-bezier).
+ *   src/engines/tuui-detector.ts — 10 s idle + coarse-pointer detector
+ *                                  that dispatches `kairos:auto-switch`.
+ *
+ * The pre-3c inline pointerdown ripple was removed to avoid double-fire
+ * on touch devices (pointerdown + touchstart would otherwise both run).
+ * Hook signature is preserved for call-site stability.
+ */
+export function useTUUIRipples(_mode: KairosMode): void {
   useEffect(() => {
-    if (mode !== 'tuui') return;
-    if (typeof document === 'undefined') return;
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Element | null;
-      if (!target || !target.closest) return;
-      const el = target.closest<HTMLElement>(
-        '.mode-btn, .pill, .btn, .task-card, .step-head, .chip, .surf, .card',
-      );
-      if (!el) return;
-      if (!el.classList.contains('tuui-target')) el.classList.add('tuui-target');
-      const rect = el.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.className = 'tuui-ripple';
-      const size = Math.max(rect.width, rect.height);
-      const px = e.clientX;
-      const py = e.clientY;
-      const x = px - rect.left - size / 2;
-      const y = py - rect.top - size / 2;
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      el.appendChild(ripple);
-      window.setTimeout(() => ripple.remove(), 700);
+    if (typeof window === 'undefined') return;
+    attachTUUIRipples();
+    const detector = startTUUIDetector();
+    return () => {
+      detector.stop();
     };
-    document.addEventListener('pointerdown', onDown);
-    return () => document.removeEventListener('pointerdown', onDown);
-  }, [mode]);
+  }, []);
 }

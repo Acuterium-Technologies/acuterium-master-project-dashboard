@@ -10,6 +10,7 @@
 'use client';
 
 import { AcuteriumLogo } from '../brand/AcuteriumLogo';
+import { ChronosLabel } from './ChronosLabel';
 import { ConformanceGauge } from './ConformanceGauge';
 
 const SECTIONS: ReadonlyArray<{ id: string; label: string }> = [
@@ -50,6 +51,7 @@ export function TopStrip({ currentSection, onSectionChange }: TopStripProps) {
       </nav>
 
       <div className="acu-top-strip__metrics">
+        <ChronosLabel variant="compact" />
         <ConformanceGauge variant="compact" target={72} />
       </div>
     </header>

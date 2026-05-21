@@ -33,6 +33,8 @@
   --orb-drift:       14s;
   --particle-opacity: .55;
   --mode-tint: transparent;
+  /* Phase 3c.01 · CHRONOS gradient fallback (overwritten on mount). */
+  --chronos-gradient: linear-gradient(135deg, #030509 0%, #05071A 45%, #0A0520 100%);
 
   /* ── GOVERNMENT EDITION (RUZN.AI · judicial · formal doc review) ── */
   --bg-gov:              #B8D4E8;
@@ -46,15 +48,19 @@
 }
 
 body.acu-master-ops {
+  /* Phase 3c.01 · CHRONOS gradient drives the linear base; radial accents
+   * stay constant so the consciousness-bar character holds across periods.
+   * The 1200ms cubic-bezier transition is the breathy time-shift. */
   background:
     radial-gradient(ellipse at 18% 20%, rgba(0,90,110,0.30) 0%, transparent 55%),
     radial-gradient(ellipse at 85% 80%, rgba(80,40,140,0.22) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 70%),
-    linear-gradient(135deg, #030509 0%, #05071A 45%, #0A0520 100%);
+    var(--chronos-gradient);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-ui);
   min-height: 100vh;
+  transition: background 1200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.acu-master-ops ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -385,6 +391,48 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
   body.acu-master-ops * { animation: none !important; transition: none !important; }
 }
 
+/* ─── Phase 3c.01 · ChronosLabel ────────────────────────────────────────
+ * Compact pill for the BI-grid top strip; full variant for the
+ * consciousness bar. Arabic labels render with native dir=rtl from the
+ * component side; the @lang="ar" font-size lift keeps glyph rhythm.
+ * Preflight 7.16 — base + full overrides defined together.
+ */
+.acu-chronos-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  background: rgba(0, 229, 212, 0.06);
+  border: 1px solid var(--border-cyan-mid);
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.acu-chronos-label[lang="ar"] {
+  font-family: var(--font-arabic, var(--font-ui));
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.acu-chronos-label--full {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 12px;
+}
+.acu-chronos-label__ar {
+  font-family: var(--font-arabic, var(--font-ui));
+  color: var(--gold-prime);
+}
+.acu-chronos-label__hour {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
 /* ─── MOBILE TRANSFORMS ────────────────────────────────────────────── */
 @media (max-width: 680px) {
   .bar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 10px; }
@@ -501,7 +549,17 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
 /* AUI uses the default body styling already declared above */
 
 /* ─── MODE: TUUI TACTILE ───────────────────────────────────────────── */
-body.mode-tuui { cursor: default; }
+/* Phase 3c.02 · TUUI tactile · cursor:none + 48px minimums + 600ms cubic-bezier ripple */
+body.mode-tuui { cursor: none; }
+body.mode-tuui .tuui-target,
+body.mode-tuui button,
+body.mode-tuui a,
+body.mode-tuui [role="button"] {
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+  min-width: 48px;
+}
 body.mode-tuui .panel, body.mode-tuui .card, body.mode-tuui .surf {
   background: rgba(13,18,53,.78); /* solid tactile surfaces */
   border-width: 2px;
@@ -512,7 +570,14 @@ body.mode-tuui .pill, body.mode-tuui .mode-btn, body.mode-tuui .btn, body.mode-t
 body.mode-tuui .chk { width: 22px; height: 22px; }
 body.mode-tuui .task-card { padding: 14px; }
 .tuui-target { position: relative; overflow: hidden; }
-.tuui-ripple { position: absolute; border-radius: 50%; background: rgba(0,229,212,.32); transform: scale(0); animation: tuuiRipple .65s linear; pointer-events: none; }
+.tuui-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 229, 212, 0.30);
+  transform: scale(0);
+  pointer-events: none;
+  animation: tuuiRipple 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
 @keyframes tuuiRipple { to { transform: scale(4); opacity: 0; } }
 
 /* ─── MODE: HUD OVERLAY ────────────────────────────────────────────── */

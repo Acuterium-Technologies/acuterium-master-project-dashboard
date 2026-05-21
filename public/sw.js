@@ -12,7 +12,7 @@
  * from the v1.3 PWA bundle. APP_SHELL paths and cache-first matcher are
  * adapted to the Next.js route /master-ops instead of the HTML filename.
  */
-const VERSION = 'acu-master-ops-v1.4.0-rc.3';
+const VERSION = 'acu-master-ops-v1.5.0-alpha.3';
 const SHELL = 'shell::' + VERSION;
 const RUNTIME = 'runtime::' + VERSION;
 
