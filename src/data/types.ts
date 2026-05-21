@@ -126,6 +126,9 @@ export type Task = {
   day: number;
   cat: 'OPERATOR' | 'COWORK' | 'CLAUDE';
   title: string;
+  done?: boolean;
+  completedAt?: string;
+  blockedBy?: string;
 };
 
 export type DoctrineClassKey =

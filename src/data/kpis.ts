@@ -11,7 +11,7 @@ import { seedTrend } from '../lib/hooks/seedTrend';
  */
 const BASE: Omit<KPI, 'trend'>[] = [
   {id:'K-01',name:'Subscriptions accessible',source:'Phase 0 verification',target:'9/9',value:'8/9',state:'on_track'},
-  {id:'K-02',name:'Channels dispatched and returned',source:'Dispatch log',target:'6/6',value:'1/6',state:'at_risk'},
+  {id:'K-02',name:'Channels dispatched and returned',source:'Dispatch log',target:'6/6',value:'3/6',state:'on_track'},
   {id:'K-03',name:'Cross-channel conflicts logged',source:'Conflicts sheet',target:'>0',value:'10',state:'achieved'},
   {id:'K-04',name:'Live URLs verified',source:'Live_Surfaces',target:'7/7',value:'1/7',state:'at_risk'},
   {id:'K-05',name:'Sprint S0 closure answered',source:'Sprint_Ledger',target:'YES',value:'PENDING',state:'at_risk'},

@@ -24,3 +24,6 @@ Thumbs.db
 
 # Phase 2 · AuditLog persistence — JSONL files written at runtime, never committed
 data/auditlog/
+
+Update-Acuterium-Dashboard-Data.ps1
+

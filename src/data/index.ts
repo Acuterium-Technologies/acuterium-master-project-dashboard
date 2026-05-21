@@ -43,3 +43,5 @@ export type {
   DoctrineScore,
   CompositeScore,
 } from './types';
+
+export * from './engineering-log';
