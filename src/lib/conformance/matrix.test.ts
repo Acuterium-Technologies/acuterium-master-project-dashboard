@@ -31,9 +31,9 @@ describe('computeStructuralConformance', () => {
     document.body.innerHTML = '';
   });
 
-  it('returns 22 rows', () => {
+  it('returns 23 rows · Phase 3d-i adds Face2Feel engine probe to the 22 baseline', () => {
     const r = computeStructuralConformance();
-    expect(r.rows).toHaveLength(22);
+    expect(r.rows).toHaveLength(23);
   });
 
   it('score is in 0..100 range', () => {

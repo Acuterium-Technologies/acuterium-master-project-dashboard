@@ -13,7 +13,9 @@ const nextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' }
+          // Phase 3d-i · camera=(self) gates same-origin Face2Feel sensor.
+          // Microphone + geolocation stay closed until Phase 3d-ii / 3d-iii.
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' }
         ]
       }
     ];

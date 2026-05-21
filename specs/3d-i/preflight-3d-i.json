@@ -1,0 +1,67 @@
+{
+  "phase": "3d-i",
+  "name": "Face2Feel",
+  "targetTag": "v1.5.0-alpha.4",
+  "preflightRuleCount": 23,
+  "carryFrom3c": [
+    { "id": "7.1",  "rule": "12 CWH rule IDs unchanged" },
+    { "id": "7.2",  "rule": "Target enum 4 base + 6 update variants" },
+    { "id": "7.3",  "rule": "6 kairosMode values" },
+    { "id": "7.4",  "rule": "PATHOS axis order Stress · Focus · Curiosity · Fatigue · Satisfaction" },
+    { "id": "7.5",  "rule": "Glass transparency 45-55%" },
+    { "id": "7.6",  "rule": "Diacritics canonical Mārel · NAHRĀ · ZemarōnOS · Finariah-ASI · M-PCB · Edna" },
+    { "id": "7.7",  "rule": "Zero external chart libraries" },
+    { "id": "7.8",  "rule": "Zero Google Fonts CDN at runtime" },
+    { "id": "7.9",  "rule": "Leak-fix middleware 58b61d1 never regresses" },
+    { "id": "7.10", "rule": "D-09 Manus quarantine · zero refs in code/network" },
+    { "id": "7.11", "rule": "MNEMOS key acu-master-ops:mnemos:v1 LOCKED" },
+    { "id": "7.12", "rule": "Cookie name acuterium-access LOCKED" },
+    { "id": "7.13", "rule": "Iron Rule · Claude on main only" },
+    { "id": "7.14", "rule": "API JSON 401 endpoints in middleware carve-out" },
+    { "id": "7.15", "rule": "Vitest include list covers new paths" },
+    { "id": "7.16", "rule": "Base CSS before override (CA-2)" },
+    { "id": "7.17", "rule": "Aurora sessionStorage key acu-hero-revealed LOCKED" },
+    { "id": "7.18", "rule": "Engine canonical names useNEXUS computePATHOS useKAIROS MNEMOS computeTELOS" },
+    { "id": "7.19", "rule": "window.__acai exposes engines for conformance probes" },
+    { "id": "7.20", "rule": "CHRONOS gradient changes at 6 GCC prayer-time boundaries (3c)" },
+    { "id": "7.21", "rule": "Reduced-motion media query respected by ALL animations (3c)" }
+  ],
+  "newIn3dI": [
+    {
+      "id": "7.22",
+      "rule": "Service Worker VERSION constant matches phase tag at commit",
+      "evidence": "curl https://master-project.acuterium.ai/sw.js | grep VERSION → acu-master-ops-v1.5.0-alpha.4"
+    },
+    {
+      "id": "7.23",
+      "rule": "Sentinel dot visible at z-index ≥ 99999 when biometric channel active",
+      "evidence": "Playwright getByTestId('sentinel-face2feel') zIndex check"
+    }
+  ],
+  "criticalAcceptance": [
+    "Consent Off (default) → no getUserMedia call",
+    "Consent Session → sessionStorage entry · clears on tab close",
+    "Consent Persistent → localStorage entry · survives reload",
+    "Consent Revoke → MediaStream tracks ended · Sentinel hidden · storage cleared",
+    "Face detected → PATHOS bars update in Dashboard mode within 1s",
+    "No face 3s → PATHOS delta emits null",
+    "Models loaded from same-origin /models/face2feel/* · no CDN",
+    "Service Worker caches models on first activation",
+    "window.__acai.face2feel exposes status/isActive/lastPathosDelta/lastConfidence/revoke",
+    "Conformance probe face2feel-engine returns true → score ~88%",
+    "Tab hidden → worker PAUSE · Sentinel paused (amber)",
+    "Tab visible → worker RESUME within 500ms",
+    "No third-party CDN requests in network tab",
+    "npm ls grep -i manus returns empty (D-09 quarantine)",
+    "All 22 new tests pass · all 91 baseline tests pass",
+    "Bundle size /master-ops first-load ≤ 145 kB (3c was 131 kB)",
+    "SW VERSION bumped to acu-master-ops-v1.5.0-alpha.4"
+  ],
+  "knownFollowups": [
+    { "id": "F-15", "status": "open", "note": "PATHOS calibration panel → 3d-iv" },
+    { "id": "F-16", "status": "open", "note": "Voice2Feel → 3d-ii" },
+    { "id": "F-17", "status": "open", "note": "Touch2Feel → 3d-iii" },
+    { "id": "F-13", "status": "closed-in-3c", "note": "MOEMatrixFull rendered" },
+    { "id": "F-14", "status": "active-discipline", "note": "SW VERSION bump in phase commit" }
+  ]
+}

@@ -69,9 +69,14 @@ import { EditDrawer } from '../../../src/components/dashboard/EditDrawer';
 import { MOEMatrixFull } from '../../../src/components/dashboard/MOEMatrixFull';
 import { SPEC_BY_TARGET, type UpdateTarget } from '../../../src/lib/dashboard/edit-specs';
 
+// Phase 3d-i · Face2Feel sensor channel
+import { SentinelDot } from '../../../src/components/biometrics/SentinelDot';
+import { useFace2Feel } from '../../../src/hooks/useFace2Feel';
+
 import '../../../src/styles/master-ops.css';
 import '../../../src/styles/bi-grid.css';
 import '../../../src/styles/edit-drawer.css';
+import '../../../src/styles/biometrics.css';
 
 type SectionId =
   | 'overview'
@@ -216,10 +221,14 @@ function MasterOpsApp() {
     [state, kairos.mode, pathos, nexus],
   );
 
+  // Phase 3d-i · Face2Feel sensor channel (default consent OFF).
+  // Hook is consent-gated internally — getUserMedia + worker spawn only fire
+  // when the user has explicitly chosen Session or Persistent.
+  const face2feel = useFace2Feel();
+
   // ── Phase 3b · expose engines to window.__acai for conformance matrix ──
-  // The ACAI structural matrix (src/lib/conformance/matrix.ts) probes
-  // window.__acai.{kairos,pathos,nexus,telos} to verify the engine layer
-  // is mounted. Exposing them here is the canonical place.
+  // Phase 3d-i adds the face2feel branch with status/isActive/lastPathosDelta/
+  // lastConfidence/revoke per spec 06.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     type AcaiWindow = Window & { __acai?: Record<string, unknown> };
@@ -229,6 +238,13 @@ function MasterOpsApp() {
       pathos,
       nexus,
       telos: { predictions },
+      face2feel: {
+        status: face2feel.tier,
+        isActive: face2feel.isActive,
+        lastPathosDelta: face2feel.lastDelta,
+        lastConfidence: face2feel.lastConfidence,
+        revoke: face2feel.revoke,
+      },
     };
     return () => {
       try {
@@ -237,7 +253,38 @@ function MasterOpsApp() {
         /* ignore */
       }
     };
-  }, [kairos.mode, kairos.autoSwitch, pathos, nexus, predictions]);
+  }, [
+    kairos.mode,
+    kairos.autoSwitch,
+    pathos,
+    nexus,
+    predictions,
+    face2feel.tier,
+    face2feel.isActive,
+    face2feel.lastDelta,
+    face2feel.lastConfidence,
+    face2feel.revoke,
+  ]);
+
+  // Phase 3d-i · Sentinel state derivation — keeps the doctrinal guarantee
+  // that the red dot is visible whenever the camera channel is live, with
+  // an amber pause when the tab is hidden.
+  const [sentinelState, setSentinelState] = useState<'inactive' | 'active' | 'paused'>('inactive');
+  useEffect(() => {
+    if (!face2feel.isActive) {
+      setSentinelState('inactive');
+      return;
+    }
+    const compute = () => {
+      if (typeof document === 'undefined') return 'active' as const;
+      return document.visibilityState === 'hidden' ? ('paused' as const) : ('active' as const);
+    };
+    setSentinelState(compute());
+    if (typeof document === 'undefined') return;
+    const onVis = () => setSentinelState(compute());
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [face2feel.isActive]);
 
   // ── Phase 3b · write-back drawer state ─────────────────────────────────
   type DraftEdit = {
@@ -507,6 +554,9 @@ function MasterOpsApp() {
 
       <canvas id="bg-canvas" />
       <div id="consciousness-orb" />
+
+      {/* Phase 3d-i · cam-active screen indicator · z-index 99999 · above all chrome */}
+      <SentinelDot channel="face2feel" state={sentinelState} />
 
       {!isDashboard && (
         <>

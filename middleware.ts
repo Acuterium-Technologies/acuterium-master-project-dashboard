@@ -47,6 +47,16 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/cron/') ||
     pathname.startsWith('/api/dashboard/') ||
     pathname.startsWith('/api/auditlog/') ||
+    // Phase 3d-i · /legal/* + /ar/legal/* are PUBLIC by GDPR Art. 9 (2)(a).
+    // The biometric disclosure must be readable by anyone deciding whether
+    // to grant consent. Operations route /master-ops/settings/biometrics
+    // remains gated by the cookie path below.
+    pathname.startsWith('/legal/') ||
+    pathname.startsWith('/ar/legal/') ||
+    // Phase 3d-i · self-hosted ML models must load same-origin without auth
+    // (consent gate happens client-side before fetch is even invoked).
+    pathname.startsWith('/models/') ||
+    pathname.startsWith('/workers/') ||
     pathname === '/manifest.webmanifest' ||
     pathname === '/sw.js' ||
     pathname === '/sovereign-fonts.css' ||

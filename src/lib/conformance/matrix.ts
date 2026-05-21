@@ -67,10 +67,10 @@ function querySelectorPresent(selector: string): boolean {
   return !!document.querySelector(selector);
 }
 
-function engineExposed(key: 'kairos' | 'pathos' | 'nexus' | 'telos'): boolean {
+function engineExposed(key: 'kairos' | 'pathos' | 'nexus' | 'telos' | 'face2feel'): boolean {
   if (typeof window === 'undefined') return false;
   const acai = (window as AcaiWindow).__acai;
-  return !!(acai && acai[key]);
+  return !!(acai && (acai as Record<string, unknown>)[key]);
 }
 
 function localStorageHas(key: string): boolean {
@@ -105,8 +105,10 @@ export function computeStructuralConformance(): StructuralConformance {
     { category: 'Engines', expected: 'MNEMOS v1 key in localStorage', present: localStorageHas('acu-master-ops:mnemos:v1'), weight: 9 },
     { category: 'Engines', expected: 'TELOS prediction panel rendered', present: querySelectorPresent('[data-qa="telos-oracle"]') || querySelectorPresent('#telos-panel'), weight: 7 },
 
-    // ─── Sensors (Phase 3d · all 0 until shipped) ──────────────────────
-    { category: 'Sensors', expected: 'Face2Feel consent gate', present: querySelectorPresent('[data-qa="face2feel-consent"]'), weight: 8 },
+    // ─── Sensors (Phase 3d · partial) ──────────────────────────────────
+    // Phase 3d-i lights Face2Feel rows; Voice/Touch/Sentinel-Light follow in 3d-ii..v.
+    { category: 'Sensors', expected: 'Face2Feel engine exposed via window.__acai.face2feel', present: engineExposed('face2feel'), weight: 5 },
+    { category: 'Sensors', expected: 'Face2Feel consent panel mounted', present: querySelectorPresent('[data-qa="face2feel-consent-panel"]'), weight: 3 },
     { category: 'Sensors', expected: 'Voice2Feel consent gate', present: querySelectorPresent('[data-qa="voice2feel-consent"]'), weight: 7 },
     { category: 'Sensors', expected: 'Touch2Feel gesture capture', present: querySelectorPresent('[data-qa="touch2feel-ready"]'), weight: 5 },
     { category: 'Sensors', expected: 'Sentinel-Light always-on', present: querySelectorPresent('[data-qa="sentinel-light"]'), weight: 9 },

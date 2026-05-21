@@ -1,0 +1,5 @@
+{
+  "mediapipe/face_landmarker.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+  "face-api/tiny_face_detector_model-shard1": "b7503ce7df31039b1c43316a9b865cab6a70dd748cc602d3fa28b551503c3871",
+  "face-api/face_expression_model-shard1": "9a9840f2cf1f4c7eab95f197512569345c00d2426754d4608b92af30e0300f3d"
+}

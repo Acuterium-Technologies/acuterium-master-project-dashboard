@@ -12,7 +12,7 @@
  * from the v1.3 PWA bundle. APP_SHELL paths and cache-first matcher are
  * adapted to the Next.js route /master-ops instead of the HTML filename.
  */
-const VERSION = 'acu-master-ops-v1.5.0-alpha.3';
+const VERSION = 'acu-master-ops-v1.5.0-alpha.4';
 const SHELL = 'shell::' + VERSION;
 const RUNTIME = 'runtime::' + VERSION;
 
@@ -83,6 +83,25 @@ self.addEventListener('fetch', (event) => {
         }
         return res;
       }).catch(() => caches.match('/master-ops')))
+    );
+    return;
+  }
+
+  // Phase 3d-i · cache-first for self-hosted ML models. Models are large
+  // (~4 MB) and immutable per content hash recorded in INTEGRITY.json, so
+  // serving from cache after first warmup is the right move. The SW
+  // VERSION bump invalidates the prior runtime cache on activate.
+  if (url.pathname.startsWith('/models/face2feel/')) {
+    event.respondWith(
+      caches.open(RUNTIME).then((cache) =>
+        cache.match(req).then((cached) => {
+          if (cached) return cached;
+          return fetch(req).then((res) => {
+            if (res && res.ok) cache.put(req, res.clone());
+            return res;
+          });
+        })
+      )
     );
     return;
   }
