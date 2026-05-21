@@ -1,0 +1,428 @@
+/* ─────────────────────────────────────────────────────────────────────
+ * Acuterium Master Ops · BI grid (Dashboard mode) · Phase 3b.01.
+ * Classification: ACUTERIUM-INTERNAL // SOVEREIGN
+ *
+ * Activates only when body.mode-dashboard is set. Every selector here
+ * scopes through that class to keep other modes (aui / hud / tuui / gui
+ * / ambient) untouched.
+ *
+ * Preflight 7.16 (base-CSS-before-override): the base layout selectors
+ * (.acu-bi-grid, .acu-bi-grid__top-strip, .acu-bi-grid__left-rail, etc.)
+ * are defined here as base rules; any later phase that adds
+ * mode-dashboard.acu-bi-grid__... overrides must already have these
+ * base rules in the same commit.
+ * ───────────────────────────────────────────────────────────────────── */
+
+/* ═══ BASE STRUCTURAL RULES ═══ */
+.acu-bi-grid {
+  display: none; /* hidden by default; mode-dashboard reveals */
+  min-height: 100vh;
+}
+.acu-bi-grid__top-strip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  height: 60px;
+}
+.acu-bi-grid__body {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+.acu-bi-grid__left-rail,
+.acu-bi-grid__right-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.acu-bi-grid__center {
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+
+/* Rail headings */
+.acu-rail-heading {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cyan-prime);
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-cyan-mid);
+}
+
+/* PATHOS sidebar */
+.acu-pathos-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.acu-pathos-axis {
+  display: grid;
+  grid-template-columns: 84px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.acu-pathos-axis__label {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.acu-pathos-axis__bar {
+  height: 4px;
+  background: rgba(0, 229, 212, 0.08);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.acu-pathos-axis__fill {
+  height: 100%;
+  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.acu-pathos-axis__value {
+  font-weight: 600;
+  text-align: right;
+}
+
+/* KAIROS mini pills */
+.acu-kairos-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.acu-kairos-mini__pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.acu-kairos-mini__pill {
+  background: transparent;
+  border: 1px solid var(--border-cyan-mid);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  padding: 5px 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.acu-kairos-mini__pill.is-active {
+  background: rgba(0, 229, 212, 0.10);
+  border-color: var(--border-cyan-bright);
+  color: var(--cyan-prime);
+}
+
+/* Session counter */
+.acu-session-counter {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 229, 212, 0.10);
+}
+.acu-session-counter__label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.acu-session-counter__value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--cyan-bright);
+}
+
+/* Top-strip pieces */
+.acu-top-strip__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.acu-top-strip__brand-text {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--text-primary);
+}
+.acu-top-strip__sections {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.acu-top-strip__pill {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.acu-top-strip__pill.is-active {
+  background: rgba(0, 229, 212, 0.12);
+  border-color: var(--border-cyan-bright);
+  color: var(--cyan-prime);
+}
+.acu-top-strip__metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* AuditLog tail */
+.acu-auditlog-tail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.acu-auditlog-tail__item {
+  display: grid;
+  grid-template-columns: 64px 1fr 70px;
+  gap: 6px;
+  padding: 4px 6px;
+  border-left: 2px solid var(--border-cyan-mid);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 229, 212, 0.02);
+}
+.acu-auditlog-tail__item.is-allow {
+  border-left-color: var(--green-ok);
+}
+.acu-auditlog-tail__item.is-deny {
+  border-left-color: var(--red-alert);
+}
+.acu-auditlog-tail__time {
+  color: var(--text-muted);
+}
+.acu-auditlog-tail__rule {
+  color: var(--cyan-prime);
+  text-align: right;
+}
+.acu-auditlog-tail__source {
+  margin-top: 6px;
+  text-align: right;
+}
+.acu-auditlog-tail__empty {
+  margin: 0;
+  padding: 8px 0;
+}
+
+/* MOE matrix mini */
+.acu-moe-matrix-mini {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: 140px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Conformance gauge */
+.acu-conformance-gauge--compact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 229, 212, 0.08);
+  border: 1px solid var(--border-cyan-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan-prime);
+}
+.acu-conformance-gauge--compact.is-below-target {
+  background: rgba(201, 168, 76, 0.10);
+  border-color: var(--border-gold);
+  color: var(--gold-prime);
+}
+.acu-conformance-gauge--compact .acu-conformance-gauge__label {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+}
+.acu-conformance-gauge--compact .acu-conformance-gauge__score {
+  font-weight: 600;
+  font-size: 13px;
+}
+.acu-conformance-gauge--compact .acu-conformance-gauge__sep,
+.acu-conformance-gauge--compact .acu-conformance-gauge__target {
+  opacity: 0.6;
+  font-size: 10px;
+}
+
+.acu-conformance-gauge--full {
+  background: var(--glass-panel);
+  border: 1px solid var(--border-cyan-mid);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.acu-conformance-gauge__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.acu-conformance-gauge__header h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.acu-conformance-gauge__score-large {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+  color: var(--cyan-bright);
+}
+.acu-conformance-gauge__score-large.is-below-target {
+  color: var(--gold-bright);
+}
+.acu-conformance-gauge__bar {
+  position: relative;
+  height: 6px;
+  background: rgba(0, 229, 212, 0.08);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.acu-conformance-gauge__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan-prime), var(--cyan-bright));
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.acu-conformance-gauge__target-line {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--gold-prime);
+}
+.acu-conformance-gauge__breakdown summary {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 0;
+}
+.acu-conformance-gauge__breakdown table {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  border-collapse: collapse;
+}
+.acu-conformance-gauge__breakdown th {
+  text-align: left;
+  color: var(--text-muted);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(0, 229, 212, 0.10);
+}
+.acu-conformance-gauge__breakdown td {
+  padding: 4px 6px;
+  border-bottom: 1px dashed rgba(0, 229, 212, 0.06);
+}
+.acu-conformance-gauge__breakdown tr.is-present td {
+  color: var(--text-secondary);
+}
+.acu-conformance-gauge__breakdown tr.is-missing td {
+  color: var(--text-ghost);
+  opacity: 0.7;
+}
+.acu-conformance-gauge__ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(0, 229, 212, 0.08);
+}
+
+/* TELOS rail wrapper · loosen the floating panel positioning */
+.acu-telos-oracle-panel__body #telos-panel {
+  position: static !important;
+  width: 100% !important;
+  right: auto !important;
+  bottom: auto !important;
+  max-width: none !important;
+  box-shadow: none;
+}
+
+/* ═══ DASHBOARD MODE ACTIVATION ═══ */
+body.mode-dashboard .acu-bi-grid {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+}
+body.mode-dashboard .acu-bi-grid__top-strip {
+  background: var(--glass-void);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border-bottom: 1px solid var(--border-cyan-mid);
+}
+body.mode-dashboard .acu-bi-grid__body {
+  grid-template-columns: 240px 1fr 300px;
+}
+body.mode-dashboard .acu-bi-grid__left-rail,
+body.mode-dashboard .acu-bi-grid__right-rail {
+  background: var(--glass-panel);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-cyan-mid);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+body.mode-dashboard .acu-bi-grid__center {
+  background: var(--glass-item);
+  border: 1px solid var(--border-cyan-mid);
+}
+
+/* Hide the in-page top nav from page.tsx when in Dashboard mode (BIGrid renders its own TopStrip). */
+body.mode-dashboard > nav.bar {
+  display: none;
+}
+
+/* ─── BREAKPOINTS ─── */
+@media (max-width: 1279px) and (min-width: 768px) {
+  body.mode-dashboard .acu-bi-grid__body {
+    grid-template-columns: 1fr;
+  }
+  body.mode-dashboard .acu-bi-grid__left-rail,
+  body.mode-dashboard .acu-bi-grid__right-rail {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  body.mode-dashboard .acu-bi-grid__top-strip {
+    grid-template-columns: auto 1fr;
+  }
+  body.mode-dashboard .acu-top-strip__sections {
+    display: none;
+  }
+  body.mode-dashboard .acu-bi-grid__body {
+    grid-template-columns: 1fr;
+  }
+  body.mode-dashboard .acu-bi-grid__left-rail,
+  body.mode-dashboard .acu-bi-grid__right-rail {
+    display: none;
+  }
+}

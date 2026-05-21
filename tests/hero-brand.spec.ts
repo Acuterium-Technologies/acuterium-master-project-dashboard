@@ -25,7 +25,10 @@ const viewports = [
 for (const vp of viewports) {
   test(`hero logo remains proportional - ${vp.name}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto('/');
+    // Phase 3b · C1 patch: HeroBrandLockup lives on /master-ops, not / (the
+    // home page renders the legacy Dashboard component). globalSetup.ts
+    // pre-authenticates so the gate doesn't redirect us to /login.
+    await page.goto('/master-ops');
 
     const hero  = page.locator('[data-qa="hero-lockup"]');
     const logo  = page.locator('[data-qa="hero-logo-frame"]');

@@ -92,6 +92,48 @@ export async function appendAuditEntry(entry: AuditEntry): Promise<AuditEntry> {
   return entry;
 }
 
+// ── Phase 3b · Read tail of JSONL for AuditLog UI panel ────────────────
+//
+// Reads the LAST N lines of today's JSONL file. Used as the fallback path
+// when Postgres is unset. Safe on serverless (data/auditlog is /tmp on
+// Vercel · the file only persists within an instance lifetime, which is
+// fine for the live-tail use case).
+export async function readJsonlTail(limit: number = 10): Promise<Array<{
+  auditId: string;
+  timestamp: string;
+  target: string;
+  verdict: string;
+  ruleId: string;
+}>> {
+  if (isEdgeRuntime()) return [];
+  try {
+    const { readFile } = await import('node:fs/promises');
+    const file = auditFilePath();
+    const content = await readFile(file, 'utf8');
+    const lines = content.split('\n').filter((l) => l.trim());
+    const tail = lines.slice(Math.max(0, lines.length - limit));
+    return tail
+      .map((line) => {
+        try {
+          const e = JSON.parse(line);
+          return {
+            auditId: e.auditId as string,
+            timestamp: e.timestamp as string,
+            target: (e.request?.target as string) ?? 'unknown',
+            verdict: e.verdict as string,
+            ruleId: e.ruleId as string,
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      .reverse(); // newest first
+  } catch {
+    return [];
+  }
+}
+
 // ── Phase 3a · Postgres durable mirror ─────────────────────────────────
 //
 // Belt-and-suspenders during the transition: JSONL stays canonical until

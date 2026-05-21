@@ -61,7 +61,14 @@ import { computeComposite } from '../../../src/lib/doctrine-scoring';
 import { META } from '../../../src/data/meta';
 import type { ResidueVerdict } from '../../../src/data/types';
 
+// Phase 3b · Dashboard-mode BI grid + write-back drawer
+import { BIGrid } from '../../../src/components/dashboard/BIGrid';
+import { EditDrawer } from '../../../src/components/dashboard/EditDrawer';
+import { SPEC_BY_TARGET, type UpdateTarget } from '../../../src/lib/dashboard/edit-specs';
+
 import '../../../src/styles/master-ops.css';
+import '../../../src/styles/bi-grid.css';
+import '../../../src/styles/edit-drawer.css';
 
 type SectionId =
   | 'overview'
@@ -185,6 +192,65 @@ function MasterOpsApp() {
       }),
     [state, kairos.mode, pathos, nexus],
   );
+
+  // ── Phase 3b · expose engines to window.__acai for conformance matrix ──
+  // The ACAI structural matrix (src/lib/conformance/matrix.ts) probes
+  // window.__acai.{kairos,pathos,nexus,telos} to verify the engine layer
+  // is mounted. Exposing them here is the canonical place.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    type AcaiWindow = Window & { __acai?: Record<string, unknown> };
+    const w = window as AcaiWindow;
+    w.__acai = {
+      kairos: { mode: kairos.mode, autoSwitch: kairos.autoSwitch },
+      pathos,
+      nexus,
+      telos: { predictions },
+    };
+    return () => {
+      try {
+        delete (w as AcaiWindow).__acai;
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [kairos.mode, kairos.autoSwitch, pathos, nexus, predictions]);
+
+  // ── Phase 3b · write-back drawer state ─────────────────────────────────
+  type DraftEdit = {
+    target: UpdateTarget;
+    targetId: string;
+    row: Record<string, string | boolean | number | null | undefined>;
+  };
+  const [draftEdit, setDraftEdit] = useState<DraftEdit | null>(null);
+
+  const openEditDrawer = useCallback(
+    (
+      target: UpdateTarget,
+      targetId: string,
+      row: Record<string, string | boolean | number | null | undefined>,
+    ) => {
+      setDraftEdit({ target, targetId, row });
+    },
+    [],
+  );
+
+  // Expose the drawer opener so mode components (or DevTools for smoke
+  // testing) can invoke it without prop-drilling through 5 layers.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    type AcaiOpener = Window & {
+      openEditDrawer?: typeof openEditDrawer;
+    };
+    (window as AcaiOpener).openEditDrawer = openEditDrawer;
+    return () => {
+      try {
+        delete (window as AcaiOpener).openEditDrawer;
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [openEditDrawer]);
 
   // ── Phase 2: server-authority CWH gate via /api/cwh/transition ──
   // useCWHTransition keeps a synchronous client preview (UX speed) but
@@ -384,6 +450,32 @@ function MasterOpsApp() {
     }
   }, [resetAll]);
 
+  // Section content rendered the same way in both shell and dashboard layout.
+  const sectionContent = (
+    <>
+      {section === 'overview' && (
+        <OverviewMode state={state} toggleMilestone={gatedToggleMilestone} />
+      )}
+      {section === 'campaign' && (
+        <CampaignMode state={state} toggleTask={gatedToggleTask} />
+      )}
+      {section === 'build' && (
+        <BuildMode state={state} toggleTask={gatedToggleTask} />
+      )}
+      {section === 'portfolio' && <PortfolioMode />}
+      {section === 'channels' && (
+        <ChannelsMode state={state} setResidue={gatedSetResidue} />
+      )}
+      {section === 'decisions' && (
+        <DecisionsPanel state={state} toggleOD={gatedToggleOD} />
+      )}
+      {section === 'migration' && <MigrationMode />}
+      {section === 'doctrine' && <DoctrineMode state={state} />}
+    </>
+  );
+
+  const isDashboard = kairos.mode === 'dashboard';
+
   return (
     <>
       {/* Sovereign font loader (self-hosted at /public/sovereign-fonts.css) */}
@@ -393,6 +485,8 @@ function MasterOpsApp() {
       <canvas id="bg-canvas" />
       <div id="consciousness-orb" />
 
+      {!isDashboard && (
+        <>
       <nav className="bar">
         <div className="brand">
           <AcuteriumLogo size={40} />
@@ -512,24 +606,7 @@ function MasterOpsApp() {
           </span>
         </div>
 
-        {section === 'overview' && (
-          <OverviewMode state={state} toggleMilestone={gatedToggleMilestone} />
-        )}
-        {section === 'campaign' && (
-          <CampaignMode state={state} toggleTask={gatedToggleTask} />
-        )}
-        {section === 'build' && (
-          <BuildMode state={state} toggleTask={gatedToggleTask} />
-        )}
-        {section === 'portfolio' && <PortfolioMode />}
-        {section === 'channels' && (
-          <ChannelsMode state={state} setResidue={gatedSetResidue} />
-        )}
-        {section === 'decisions' && (
-          <DecisionsPanel state={state} toggleOD={gatedToggleOD} />
-        )}
-        {section === 'migration' && <MigrationMode />}
-        {section === 'doctrine' && <DoctrineMode state={state} />}
+        {sectionContent}
 
         <div className="divider" />
         <div
@@ -546,6 +623,40 @@ function MasterOpsApp() {
           </span>
         </div>
       </div>
+        </>
+      )}
+
+      {isDashboard && (
+        <BIGrid
+          mode={kairos.mode}
+          pathos={pathos}
+          kairosLabel={kairos.mode}
+          profile={profile}
+          nexus={nexus}
+          predictions={predictions}
+          onTelosAction={onTelosAction}
+          onModeChange={(m) => kairos.setMode(m as KairosMode)}
+          onSectionChange={(s) => isSectionId(s) && setSection(s)}
+          currentSection={section}
+        >
+          {sectionContent}
+        </BIGrid>
+      )}
+
+      {draftEdit && (
+        <EditDrawer
+          open={true}
+          target={draftEdit.target}
+          targetId={draftEdit.targetId}
+          row={draftEdit.row}
+          fieldSpec={SPEC_BY_TARGET[draftEdit.target]}
+          actorSession={sessionId}
+          pathos={pathos}
+          kairosMode={kairos.mode}
+          doctrineScore={composedDoctrineScore}
+          onClose={() => setDraftEdit(null)}
+        />
+      )}
     </>
   );
 }
