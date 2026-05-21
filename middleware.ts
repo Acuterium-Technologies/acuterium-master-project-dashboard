@@ -44,6 +44,7 @@ export function middleware(request: NextRequest) {
     pathname === '/api/login' ||
     pathname === '/api/seed' ||
     pathname === '/api/cwh/transition' ||
+    pathname.startsWith('/api/cron/') ||
     pathname === '/manifest.webmanifest' ||
     pathname === '/sw.js' ||
     pathname === '/sovereign-fonts.css' ||
