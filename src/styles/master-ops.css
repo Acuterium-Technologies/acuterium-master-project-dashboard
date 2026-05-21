@@ -300,12 +300,79 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
 .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,229,212,.20), transparent); margin: 14px 0; }
 .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* ─── CONSCIOUSNESS NAV BAR ────────────────────────────────────────── */
+.bar {
+  position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 18px;
+  padding: 0 22px; height: 62px;
+  background: var(--glass-void); backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border-cyan-mid);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-name { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .18em; color: var(--text-primary); }
+.brand-tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: .22em; color: var(--cyan-prime); opacity: .85; }
+.modes { display: flex; gap: 4px; margin-left: 18px; flex-wrap: wrap; }
+.mode-btn {
+  background: transparent; border: 1px solid transparent; border-radius: var(--radius-pill);
+  color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+  padding: 6px 14px; cursor: pointer; transition: all var(--t-fast); text-transform: uppercase;
+}
+.mode-btn:hover { background: rgba(0,229,212,.08); color: var(--cyan-prime); }
+.mode-btn.active {
+  background: rgba(0,229,212,.12); border-color: var(--border-cyan-bright); color: var(--cyan-prime);
+  box-shadow: 0 0 16px rgba(0,229,212,.18);
+}
+.spacer { flex: 1; }
+
+/* ─── HERO ─────────────────────────────────────────────────────────── */
+.hero { padding: 28px 4px 14px; display: flex; flex-direction: column; gap: 10px; }
+.hero h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 600;
+  font-size: clamp(28px, 3.4vw, 42px); letter-spacing: .06em;
+  background: linear-gradient(135deg, var(--cyan-prime), var(--gold-prime) 60%, var(--cyan-bright));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em; color: var(--text-muted); text-transform: uppercase; }
+
+/* ─── DEPLOYMENT BANNER ────────────────────────────────────────────── */
+.dep {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px;
+  background: linear-gradient(90deg, rgba(48,209,88,.10), rgba(0,229,212,.06) 60%, transparent);
+  border: 1px solid rgba(48,209,88,.28); border-radius: var(--radius-md); margin-bottom: 18px;
+}
+.dep .ok { color: var(--green-ok); }
+.dep code { font-family: var(--font-mono); font-size: 11px; color: var(--gold-bright); background: rgba(201,168,76,.08); padding: 2px 6px; border-radius: 4px; }
+
+/* ─── NEXUS CHIP · PWA INSTALL · OFFLINE INDICATOR ─────────────────── */
+#nexus-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(123,104,238,.08); border: 1px solid rgba(123,104,238,.30);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .18em; color: var(--violet-qenc);
+}
+#nexus-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--violet-qenc); box-shadow: 0 0 6px var(--violet-qenc); }
+.pwa-install { display: none; }
+.pwa-install.show { display: inline-flex; }
+.offline-chip {
+  background: rgba(255,107,53,.10) !important; border-color: rgba(255,107,53,.40) !important; color: var(--amber-warm) !important;
+}
+.offline-chip .dot { background: var(--amber-warm) !important; box-shadow: 0 0 6px var(--amber-warm) !important; }
+
 @media (prefers-reduced-motion: reduce) {
   body.acu-master-ops * { animation: none !important; transition: none !important; }
 }
 
 /* ─── MOBILE TRANSFORMS ────────────────────────────────────────────── */
 @media (max-width: 680px) {
+  .bar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 10px; }
+  .modes { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; padding-bottom: 4px; }
+  .mode-btn { padding: 8px 14px; font-size: 9px; min-height: 36px; min-width: 44px; }
+  .brand-tag { font-size: 8px; }
+  .hero { padding: 16px 4px 8px; }
+  .hero h1 { font-size: clamp(22px, 7vw, 30px); }
+  .dep { flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; }
+  .dep .right { margin-left: 0; }
   .shell { padding: 12px 12px 60px; }
   .panel { padding: 12px; border-radius: 14px; }
   .panel-title { font-size: 11px; flex-wrap: wrap; }
@@ -332,7 +399,7 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
   .gantt-row { grid-template-columns: 70px 180px 1fr 80px; }
 }
 @media (hover: none) and (pointer: coarse) {
-  .pill, .btn { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
+  .pill, .mode-btn, .btn { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
   .task-card { padding: 10px; min-height: 44px; }
   .chk { width: 18px; height: 18px; }
 }
