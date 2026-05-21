@@ -43,6 +43,7 @@ export function middleware(request: NextRequest) {
     pathname === '/login' ||
     pathname === '/api/login' ||
     pathname === '/api/seed' ||
+    pathname === '/api/cwh/transition' ||
     pathname === '/manifest.webmanifest' ||
     pathname === '/sw.js' ||
     pathname === '/sovereign-fonts.css' ||
@@ -53,6 +54,11 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/fonts/') ||
     pathname.startsWith('/brand/')
   ) {
+    // /api/cwh/transition carve-out (Phase 2, ADDITIVE): the route
+    // performs its own bearer-cookie check internally so it can return
+    // structured JSON 401/403/429 instead of a 307 redirect. Other API
+    // routes (/api/sheet, etc.) continue to be gated by this middleware.
+    // Leak-fix 58b61d1 preserved (existing assertions unchanged).
     return NextResponse.next();
   }
 

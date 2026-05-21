@@ -21,3 +21,6 @@ Thumbs.db
 
 .vercel
 .sentryclirc
+
+# Phase 2 · AuditLog persistence — JSONL files written at runtime, never committed
+data/auditlog/

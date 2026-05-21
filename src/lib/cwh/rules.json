@@ -1,0 +1,93 @@
+{
+  "$schema": "https://acuterium.ai/schemas/cwh-rules-v1.0.json",
+  "version": "1.0.0",
+  "phase": "1.4-phase-2",
+  "canon": "ACU-NAMING-CANON v1.0",
+  "evaluation": "first-match-wins",
+  "rules": [
+    {
+      "id": "CWH-R-01",
+      "predicate": "actor.pathos.stress > 90",
+      "verdict": "deny",
+      "doctrineDelta": -1.5,
+      "intent": "operator welfare · stress ceiling"
+    },
+    {
+      "id": "CWH-R-02",
+      "predicate": "actor.pathos.fatigue > 85 && target === 'od'",
+      "verdict": "deny",
+      "doctrineDelta": -1.0,
+      "intent": "defer owner decisions when fatigue is high"
+    },
+    {
+      "id": "CWH-R-03",
+      "predicate": "actor.pathos.satisfaction < 20 && target === 'residue'",
+      "verdict": "deny",
+      "doctrineDelta": -0.8,
+      "intent": "low satisfaction is not a state from which to finalize residue"
+    },
+    {
+      "id": "CWH-R-04",
+      "predicate": "target === 'task' && isLegalTaskTransition(fromState, toState)",
+      "verdict": "allow",
+      "doctrineDelta": 0.3,
+      "intent": "legal task lifecycle transition"
+    },
+    {
+      "id": "CWH-R-05",
+      "predicate": "target === 'milestone' && fromState.startsWith('inc:')",
+      "verdict": "deny",
+      "doctrineDelta": -0.5,
+      "intent": "milestone gated by parent task completeness"
+    },
+    {
+      "id": "CWH-R-06",
+      "predicate": "target === 'od' && actor.pathos.focus < 30",
+      "verdict": "deny",
+      "doctrineDelta": -0.7,
+      "intent": "owner decisions require sustained focus"
+    },
+    {
+      "id": "CWH-R-07",
+      "predicate": "target === 'residue' && fromState in ['CLEAN','BLOCKED']",
+      "verdict": "deny",
+      "doctrineDelta": -0.4,
+      "intent": "terminal residue verdicts cannot be re-opened from this endpoint"
+    },
+    {
+      "id": "CWH-R-08",
+      "predicate": "context.doctrineScore < 40",
+      "verdict": "deny",
+      "doctrineDelta": -0.6,
+      "intent": "stabilise composite compliance before further transitions"
+    },
+    {
+      "id": "CWH-R-09",
+      "predicate": "context.kairosMode === 'Ambient' && target === 'od'",
+      "verdict": "deny",
+      "doctrineDelta": -0.5,
+      "intent": "Ambient mode is reflective · exit before closing OD"
+    },
+    {
+      "id": "CWH-R-10",
+      "predicate": "actor.pathos.curiosity > 80 && target === 'task'",
+      "verdict": "allow",
+      "doctrineDelta": 0.5,
+      "intent": "exploration bonus when curiosity is high on task work"
+    },
+    {
+      "id": "CWH-R-11",
+      "predicate": "actor.pathos.stress > 85 && target === 'residue'",
+      "verdict": "deny",
+      "doctrineDelta": -1.2,
+      "intent": "stress + residue · ethical guard tripped (highest specificity)"
+    },
+    {
+      "id": "CWH-R-12",
+      "predicate": "default",
+      "verdict": "allow",
+      "doctrineDelta": 0.1,
+      "intent": "default permissive · no rule fired"
+    }
+  ]
+}

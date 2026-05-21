@@ -55,7 +55,8 @@ import { HeroBrandLockup } from '../../../src/components/brand/HeroBrandLockup';
 import { AcuteriumLogo } from '../../../src/components/brand/AcuteriumLogo';
 import { usePersistedState } from '../../../src/lib/hooks/usePersistedState';
 import { useParticles } from '../../../src/lib/hooks/useParticles';
-import { cwhGate } from '../../../src/lib/cwh-gate';
+import { useCWHTransition } from '../../../src/hooks/useCWHTransition';
+import type { KairosModeApi, TransitionRequest } from '../../../src/lib/cwh/types';
 import { computeComposite } from '../../../src/lib/doctrine-scoring';
 import { META } from '../../../src/data/meta';
 import type { ResidueVerdict } from '../../../src/data/types';
@@ -95,6 +96,16 @@ const KAIROS_MODE_PILLS: ReadonlyArray<{ id: KairosMode; label: string; hint: st
 function isSectionId(v: string | null): v is SectionId {
   return v != null && SECTIONS.some((s) => s.id === v);
 }
+
+// Map engine-layer KairosMode (lowercase) → API contract (canonical case).
+const KAIROS_MODE_TO_API: Record<KairosMode, KairosModeApi> = {
+  aui: 'AUI',
+  tuui: 'TUUI',
+  hud: 'HUD',
+  gui: 'GUI',
+  dashboard: 'Dashboard',
+  ambient: 'Ambient',
+};
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -175,70 +186,126 @@ function MasterOpsApp() {
     [state, kairos.mode, pathos, nexus],
   );
 
-  // ── CWH-gated togglers — every state transition routes through D-05. ──
+  // ── Phase 2: server-authority CWH gate via /api/cwh/transition ──
+  // useCWHTransition keeps a synchronous client preview (UX speed) but
+  // the server's verdict is final truth. On parity (preflight rule 7.15)
+  // both verdicts always agree; the server adds the persisted auditId.
+  const composite = useMemo(() => computeComposite(state), [state]);
+  const composedDoctrineScore = composite.avg;
+  const sessionId = profile.firstSeen || 'sess';
+
+  const cwhSubmit = useCWHTransition({
+    onTelemetry: (t) => {
+      if (t.phase === 'denied' && t.server) {
+        showModeToast('CWH SERVER DENY · ' + t.server.ruleId + ' · ' + (t.server.reason ?? ''));
+      } else if (t.phase === 'rate_limited') {
+        showModeToast('CWH RATE-LIMIT · slow down');
+      } else if (t.phase === 'network_error') {
+        showModeToast('CWH OFFLINE · client preview applied');
+      }
+    },
+  });
+
+  const buildRequest = useCallback(
+    (
+      target: TransitionRequest['target'],
+      targetId: string,
+      fromState: string,
+      toState: string,
+    ): TransitionRequest => ({
+      target,
+      targetId,
+      fromState,
+      toState,
+      actor: {
+        session: sessionId,
+        pathos: {
+          stress: pathos.stress,
+          focus: pathos.focus,
+          curiosity: pathos.curiosity,
+          fatigue: pathos.fatigue,
+          satisfaction: pathos.satisfaction,
+        },
+      },
+      context: {
+        kairosMode: KAIROS_MODE_TO_API[kairos.mode],
+        doctrineScore: composedDoctrineScore,
+      },
+    }),
+    [sessionId, pathos, kairos.mode, composedDoctrineScore],
+  );
+
   const gatedToggleTask = useCallback(
     (id: string) => {
       const before = !!state.done[id];
-      const result = cwhGate({
-        kind: 'task',
-        id,
-        before,
-        after: !before,
-        persistedState: state,
+      const input = buildRequest('task', id, before ? 'done' : 'open', before ? 'open' : 'done');
+      const outcome = cwhSubmit.submit(input);
+      // Optimistic apply when preview allows — reconcile on server response.
+      Promise.resolve(outcome).then((o) => {
+        if (o.allow) {
+          toggleTask(id);
+        } else {
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+        }
       });
-      if (result.allow) toggleTask(id);
-      else showModeToast('CWH GATE · ' + (result.reason ?? 'denied'));
     },
-    [state, toggleTask],
+    [state, toggleTask, buildRequest, cwhSubmit],
   );
 
   const gatedToggleMilestone = useCallback(
     (id: string) => {
       const before = !!state.closedMs[id];
-      const result = cwhGate({
-        kind: 'milestone',
+      const input = buildRequest(
+        'milestone',
         id,
-        before,
-        after: !before,
-        persistedState: state,
+        before ? 'closed' : 'open',
+        before ? 'open' : 'closed',
+      );
+      Promise.resolve(cwhSubmit.submit(input)).then((o) => {
+        if (o.allow) {
+          toggleMilestone(id);
+        } else {
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+        }
       });
-      if (result.allow) toggleMilestone(id);
-      else showModeToast('CWH GATE · ' + (result.reason ?? 'denied'));
     },
-    [state, toggleMilestone],
+    [state, toggleMilestone, buildRequest, cwhSubmit],
   );
 
   const gatedToggleOD = useCallback(
     (id: string) => {
       const before = !!state.closedODs[id];
-      const result = cwhGate({
-        kind: 'OD',
+      const input = buildRequest(
+        'od',
         id,
-        before,
-        after: !before,
-        persistedState: state,
+        before ? 'closed' : 'open',
+        before ? 'open' : 'closed',
+      );
+      Promise.resolve(cwhSubmit.submit(input)).then((o) => {
+        if (o.allow) {
+          toggleOD(id);
+        } else {
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+        }
       });
-      if (result.allow) toggleOD(id);
-      else showModeToast('CWH GATE · ' + (result.reason ?? 'denied'));
     },
-    [state, toggleOD],
+    [state, toggleOD, buildRequest, cwhSubmit],
   );
 
   const gatedSetResidue = useCallback(
     (v: ResidueVerdict) => {
       const before = state.residueVerdict;
       if (before === v) return;
-      const result = cwhGate({
-        kind: 'residue',
-        id: 'CH-6',
-        before,
-        after: v,
-        persistedState: state,
+      const input = buildRequest('residue', 'CH-6', before, v);
+      Promise.resolve(cwhSubmit.submit(input)).then((o) => {
+        if (o.allow) {
+          setResidue(v);
+        } else {
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+        }
       });
-      if (result.allow) setResidue(v);
-      else showModeToast('CWH GATE · ' + (result.reason ?? 'denied'));
     },
-    [state, setResidue],
+    [state, setResidue, buildRequest, cwhSubmit],
   );
 
   // ── PWA: install prompt · offline indicator · service worker register ──
@@ -299,7 +366,6 @@ function MasterOpsApp() {
     [kairos],
   );
 
-  const composite = useMemo(() => computeComposite(state), [state]);
   const sheetIdShort = META.sheetId.slice(0, 18);
 
   const handleReset = useCallback(() => {
