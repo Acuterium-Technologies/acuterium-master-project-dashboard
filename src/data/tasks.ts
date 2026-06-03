@@ -63,9 +63,53 @@ export const TASKS: Task[] = [
   {id:'TB-01',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Haptic feedback (navigator.vibrate patterns)'},
   {id:'TB-02',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Dual-tone chameleon palette (dominant-axis accent)'},
   {id:'TB-03',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Multi-sensory feedback layer (visual · haptic · audio)'},
-  {id:'TC-01',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · ACAI-Lab sandbox scaffold (isolated route)'},
-  {id:'TC-02',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · EEG / Muse neuro-signal ingest'},
-  {id:'TC-03',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · In-browser DeepSeek-MoE inference'},
+  // ── Phase 6 · ACAI Phase C — ACAI-Lab Sandbox (detailed WBS) ──
+  // Owner = cat (OPERATOR=decision/legal/sign-off · COWORK=coordination/docs ·
+  // CLAUDE=engineering). Three EPIC anchors (day 34) + granular subtasks.
+  {id:'TC-01',phase:6,day:34,cat:'CLAUDE',title:'EPIC · ACAI-Lab sandbox scaffold + consent/governance'},
+  {id:'TC-02',phase:6,day:34,cat:'CLAUDE',title:'EPIC · Affective & cognitive-load capture (commodity sensors, no headset)'},
+  {id:'TC-03',phase:6,day:34,cat:'CLAUDE',title:'EPIC · In-browser reasoning core — small quantized MoE (WebGPU)'},
+  // TC-00 · Foundation & isolation
+  {id:'TC-00.1',phase:6,day:35,cat:'CLAUDE',title:'Isolated lab route (app/.../acai-lab) — own bundle, never imported by prod'},
+  {id:'TC-00.2',phase:6,day:35,cat:'CLAUDE',title:'Feature flag NEXT_PUBLIC_ACAI_LAB (default OFF) — prod untouched'},
+  {id:'TC-00.3',phase:6,day:35,cat:'CLAUDE',title:'Lazy-load heavy deps via next/dynamic ssr:false (keep main chunk clean)'},
+  {id:'TC-00.4',phase:6,day:35,cat:'CLAUDE',title:'Lab shell + capability detection (Web Bluetooth / WebGPU / memory)'},
+  {id:'TC-00.5',phase:6,day:35,cat:'CLAUDE',title:'Confirm middleware auth gate covers the lab route'},
+  // TC-01 · Consent & governance
+  {id:'TC-01.1',phase:6,day:36,cat:'CLAUDE',title:'Neuro-data consent gate (separate, revocable, MNEMOS-persisted)'},
+  {id:'TC-01.2',phase:6,day:36,cat:'CLAUDE',title:'Neuro disclosure legal page (EN + AR) — GDPR Art. 9 special category'},
+  {id:'TC-01.3',phase:6,day:36,cat:'CLAUDE',title:'Local-only guarantee banner + architecture note (no data leaves device)'},
+  {id:'TC-01.4',phase:6,day:36,cat:'CLAUDE',title:'Kill-switch: disconnect & purge all buffers + revoke consent'},
+  {id:'TC-01.5',phase:6,day:36,cat:'CLAUDE',title:'Audit-log lab session start/stop (metadata only, never raw signals)'},
+  // TC-02 · Affective & cognitive-load capture (commodity sensors — no headset;
+  // future users won't own EEG, so derive proxies from webcam + behavior).
+  {id:'TC-02.0',phase:6,day:37,cat:'CLAUDE',title:'Affective-proxy signal model: map commodity signals → 5 PATHOS axes'},
+  {id:'TC-02.1',phase:6,day:37,cat:'CLAUDE',title:'Webcam attention: blink rate · gaze-on-screen · head pose (face-api landmarks)'},
+  {id:'TC-02.2',phase:6,day:37,cat:'CLAUDE',title:'rPPG heart-rate / HRV from webcam (stress/arousal proxy) in a Web Worker'},
+  {id:'TC-02.3',phase:6,day:37,cat:'CLAUDE',title:'Behavioral cognitive-load from NEXUS: pointer/scroll/keystroke dynamics · dwell · corrections'},
+  {id:'TC-02.4',phase:6,day:37,cat:'CLAUDE',title:'Signal-quality + confidence gating + artifact rejection (lighting/off-camera/idle)'},
+  {id:'TC-02.5',phase:6,day:37,cat:'CLAUDE',title:'Fuse all proxies → PathosDelta (same contract as Face2Feel, confidence-weighted)'},
+  {id:'TC-02.6',phase:6,day:37,cat:'CLAUDE',title:'Live visualization: attention · arousal · cognitive-load gauges + sparklines'},
+  {id:'TC-02.7',phase:6,day:37,cat:'CLAUDE',title:'Synthetic replay/demo mode (scripted stream — no camera, CI-safe)'},
+  // TC-03 · In-browser reasoning core — small quantized MoE (decided)
+  {id:'TC-03.0',phase:6,day:38,cat:'CLAUDE',title:'Model: small quantized MoE via WebLLM (decided) — runtime select + smoke load'},
+  {id:'TC-03.1',phase:6,day:38,cat:'CLAUDE',title:'WebGPU capability gate + fallback (no GPU → disable tab, EEG still works)'},
+  {id:'TC-03.2',phase:6,day:38,cat:'CLAUDE',title:'Model runtime (WebLLM/transformers.js) + weights download/cache UI'},
+  {id:'TC-03.3',phase:6,day:38,cat:'CLAUDE',title:'Inference Web Worker (off main thread) + streaming tokens'},
+  {id:'TC-03.4',phase:6,day:38,cat:'CLAUDE',title:'Reasoning-core UI + PATHOS/EEG context injector'},
+  {id:'TC-03.5',phase:6,day:38,cat:'CLAUDE',title:'Latency/throughput telemetry (tokens/sec · first-token · VRAM)'},
+  {id:'TC-03.6',phase:6,day:38,cat:'CLAUDE',title:'Hard local-only enforcement (zero outbound inference calls)'},
+  // TC-04 · Integration with the living interface
+  {id:'TC-04.1',phase:6,day:39,cat:'CLAUDE',title:'Fuse EEG PathosDelta into computePATHOS (lab-flagged, prod unaffected)'},
+  {id:'TC-04.2',phase:6,day:39,cat:'CLAUDE',title:'Chameleon palette driven by measured neuro-focus'},
+  {id:'TC-04.3',phase:6,day:39,cat:'CLAUDE',title:'Multi-sensory feedback responds to neuro-events (overload calm cue)'},
+  {id:'TC-04.4',phase:6,day:39,cat:'CLAUDE',title:'Adaptive-density HUG2UI proof-of-concept (load-driven disclosure)'},
+  // TC-05 · QA, docs, governance close-out
+  {id:'TC-05.1',phase:6,day:40,cat:'CLAUDE',title:'Unit tests: band math · neuro→PathosDelta · consent FSM · gates'},
+  {id:'TC-05.2',phase:6,day:40,cat:'CLAUDE',title:'Replay-mode integration test (CI-safe, no hardware/GPU)'},
+  {id:'TC-05.3',phase:6,day:40,cat:'CLAUDE',title:'Bundle-guard test: lab deps absent from the main /master-ops chunk'},
+  {id:'TC-05.4',phase:6,day:40,cat:'COWORK',title:'Update status report + changelog; mark TC-01/02/03 done'},
+  {id:'TC-05.5',phase:6,day:40,cat:'OPERATOR',title:'Doctrine privacy sign-off (neuro disclosure + local-only claim)'},
   // ── Phase 5 · Platform & Observability ──
   {id:'TP-01',phase:5,day:34,cat:'CLAUDE',title:'Vercel Web Analytics integration (@vercel/analytics/next)',done:true,completedAt:'2026-06-03'},
   {id:'TP-02',phase:5,day:34,cat:'CLAUDE',title:'Vercel Speed Insights integration (@vercel/speed-insights/next)',done:true,completedAt:'2026-06-03'},
