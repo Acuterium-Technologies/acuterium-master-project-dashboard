@@ -17,13 +17,15 @@
   --acu-hero-title-size: clamp(2rem, 3.2vw, 3.4rem);
   --acu-hero-subtitle-size: clamp(0.98rem, 1.2vw, 1.12rem);
 
-  --acu-hero-logo-compact: 72px;
-  --acu-hero-logo-standard: 96px;
-  --acu-hero-logo-prominent: 120px;
+  /* Fluid, doctrine-aligned hero logo sizing — smaller + responsive across
+     desktop/tablet/mobile via clamp() (was a fixed 72px that read too large). */
+  --acu-hero-logo-compact: clamp(40px, 5vw, 54px);
+  --acu-hero-logo-standard: clamp(52px, 6.5vw, 72px);
+  --acu-hero-logo-prominent: clamp(64px, 8vw, 96px);
 
-  --acu-hero-logo-mobile-compact: 52px;
-  --acu-hero-logo-mobile-standard: 64px;
-  --acu-hero-logo-mobile-prominent: 80px;
+  --acu-hero-logo-mobile-compact: 40px;
+  --acu-hero-logo-mobile-standard: 52px;
+  --acu-hero-logo-mobile-prominent: 64px;
 
   --acu-hero-border: rgba(255, 255, 255, 0.08);
   --acu-hero-text-muted: rgba(255, 255, 255, 0.72);

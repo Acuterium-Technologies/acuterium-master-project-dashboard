@@ -67,6 +67,7 @@ import type { ResidueVerdict } from '../../../src/data/types';
 // Phase 3b · Dashboard-mode BI grid + write-back drawer
 import { BIGrid } from '../../../src/components/dashboard/BIGrid';
 import { ChronosLabel } from '../../../src/components/dashboard/ChronosLabel';
+import { LiveClock } from '../../../src/components/dashboard/LiveClock';
 import { EditDrawer } from '../../../src/components/dashboard/EditDrawer';
 import { MOEMatrixFull } from '../../../src/components/dashboard/MOEMatrixFull';
 import { SPEC_BY_TARGET, type UpdateTarget } from '../../../src/lib/dashboard/edit-specs';
@@ -773,12 +774,12 @@ function MasterOpsApp() {
           style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}
         >
           <span className="mono xs">
-            Acuterium Technologies Inc. · Muscat, Sultanate of Oman ·{' '}
-            {META.classification}
+            Acuterium Technologies Inc. ·{' '}
+            {`${META.classification} // Genesis Through Intelligence`}
           </span>
           <span className="mono xs">
             {META.docVersion} · KAIROS·NEXUS·PATHOS·MNEMOS·TELOS · ASIP v2 ·
-            ACT·INT·CON · {META.generated}
+            ACT·INT·CON · <LiveClock />
           </span>
         </div>
       </div>
