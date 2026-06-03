@@ -52,6 +52,7 @@ import {
   DecisionsPanel,
   MigrationMode,
   DoctrineMode,
+  ReportsMode,
 } from '../../../src/components/modes';
 import { HeroBrandLockup } from '../../../src/components/brand/HeroBrandLockup';
 import { AcuteriumLogo } from '../../../src/components/brand/AcuteriumLogo';
@@ -87,7 +88,8 @@ type SectionId =
   | 'channels'
   | 'decisions'
   | 'migration'
-  | 'doctrine';
+  | 'doctrine'
+  | 'reports';
 
 const SECTIONS: ReadonlyArray<{ id: SectionId; label: string }> = [
   { id: 'overview', label: 'OVERVIEW' },
@@ -98,6 +100,7 @@ const SECTIONS: ReadonlyArray<{ id: SectionId; label: string }> = [
   { id: 'decisions', label: 'DECISIONS' },
   { id: 'migration', label: 'MIGRATION' },
   { id: 'doctrine', label: 'DOCTRINE' },
+  { id: 'reports', label: 'REPORTS' },
 ];
 
 const KAIROS_MODE_PILLS: ReadonlyArray<{ id: KairosMode; label: string; hint: string }> = [
@@ -608,6 +611,7 @@ function MasterOpsApp() {
       )}
       {section === 'migration' && <MigrationMode />}
       {section === 'doctrine' && <DoctrineMode state={state} />}
+      {section === 'reports' && <ReportsMode />}
     </>
   );
 
