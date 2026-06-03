@@ -4,7 +4,6 @@ out/
 build/
 dist/
 tsconfig.tsbuildinfo
-package-lock.json
 
 .env
 .env.local
