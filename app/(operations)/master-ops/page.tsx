@@ -34,6 +34,8 @@ import {
   useNEXUS,
   computePATHOS,
   applyBreathing,
+  applyChameleon,
+  useProgressiveDisclosure,
   PathosSidebar,
   useKAIROS,
   useTUUIRipples,
@@ -194,19 +196,37 @@ function MasterOpsApp() {
   }, []);
 
   const nexus = useNEXUS(setProfile);
+
+  // Phase 3d-i · Face2Feel sensor channel (default consent OFF; consent-gated
+  // internally). Declared before PATHOS so its emotion delta can feed the
+  // 5-axis state (Phase A · living interface).
+  const face2feel = useFace2Feel();
+
   const pathos = useMemo(
-    () => computePATHOS({ nexus, profile, persisted: state }),
-    [nexus, profile, state],
+    () =>
+      computePATHOS({
+        nexus,
+        profile,
+        persisted: state,
+        faceDelta: face2feel.isActive ? face2feel.lastDelta : null,
+        faceConfidence: face2feel.isActive ? face2feel.lastConfidence : 0,
+      }),
+    [nexus, profile, state, face2feel.isActive, face2feel.lastDelta, face2feel.lastConfidence],
   );
 
   useEffect(() => {
     applyBreathing(pathos);
+    applyChameleon(pathos);
     setProfile((p) => {
       const np: MnemosProfile = { ...p, lastPathos: pathos };
       MNEMOS.save(np);
       return np;
     });
   }, [pathos]);
+
+  // Phase A · progressive disclosure — sets the acu-expertise-{tier} body class
+  // from the persistent profile so the surface can densify for experts.
+  useProgressiveDisclosure(profile);
 
   const kairos = useKAIROS({ nexus, pathos, profile, setProfile });
   useTUUIRipples(kairos.mode);
@@ -225,11 +245,6 @@ function MasterOpsApp() {
       }),
     [state, kairos.mode, pathos, nexus],
   );
-
-  // Phase 3d-i · Face2Feel sensor channel (default consent OFF).
-  // Hook is consent-gated internally — getUserMedia + worker spawn only fire
-  // when the user has explicitly chosen Session or Persistent.
-  const face2feel = useFace2Feel();
 
   // ── Phase 3b · expose engines to window.__acai for conformance matrix ──
   // Phase 3d-i adds the face2feel branch with status/isActive/lastPathosDelta/
