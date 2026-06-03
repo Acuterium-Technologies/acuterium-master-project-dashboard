@@ -27,7 +27,7 @@ export function AcuteriumLogo({
   return (
     /* eslint-disable-next-line @next/next/no-img-element */
     <img
-      src="/brand/acuterium-logo.svg"
+      src="/brand/acuterium-logo-mark.png"
       alt={ariaLabel}
       width={size}
       height={size}

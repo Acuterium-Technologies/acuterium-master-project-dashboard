@@ -1,5 +1,7 @@
 'use client';
 
+import { AcuteriumLogo } from '../src/components/brand/AcuteriumLogo';
+
 type Props = { savedAt: Date | null };
 
 export function Header({ savedAt }: Props) {
@@ -14,15 +16,18 @@ export function Header({ savedAt }: Props) {
       gap: 16,
       flexWrap: 'wrap'
     }}>
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, letterSpacing: 2, marginBottom: 4 }}>
-          ACUTERIUM-INTERNAL · SOVEREIGN
-        </div>
-        <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--ink)', letterSpacing: -0.5 }}>
-          Master Project Dashboard
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--slate)', marginTop: 2 }}>
-          Acuterium portfolio coordination platform · Stage Two
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <AcuteriumLogo size={48} />
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, letterSpacing: 2, marginBottom: 4 }}>
+            ACUTERIUM-INTERNAL · SOVEREIGN
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--ink)', letterSpacing: -0.5 }}>
+            Master Project Dashboard
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--slate)', marginTop: 2 }}>
+            Acuterium portfolio coordination platform · Stage Two
+          </div>
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>

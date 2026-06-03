@@ -41,7 +41,7 @@ export type HeroBrandLockupProps = {
   className?: string;
 };
 
-const DEFAULT_LOGO_SRC = '/brand/acuterium-logo.svg';
+const DEFAULT_LOGO_SRC = '/brand/acuterium-logo-mark.png';
 const HERO_REVEALED_KEY = 'acu-hero-revealed';
 
 export function HeroBrandLockup({
