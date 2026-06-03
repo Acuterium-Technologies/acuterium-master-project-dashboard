@@ -65,6 +65,7 @@ import { useCWHTransition } from '../../../src/hooks/useCWHTransition';
 import type { KairosModeApi, TransitionRequest } from '../../../src/lib/cwh/types';
 import { computeComposite } from '../../../src/lib/doctrine-scoring';
 import { META } from '../../../src/data/meta';
+import { TasksProvider } from '../../../src/data/useTasks';
 import type { ResidueVerdict } from '../../../src/data/types';
 
 // Phase 3b · Dashboard-mode BI grid + write-back drawer
@@ -849,9 +850,12 @@ function MasterOpsApp() {
 
 export default function MasterOpsPage() {
   // useSearchParams requires a Suspense boundary in the App Router.
+  // TasksProvider hydrates the task list live from the Sheet (seed fallback).
   return (
     <Suspense fallback={null}>
-      <MasterOpsApp />
+      <TasksProvider>
+        <MasterOpsApp />
+      </TasksProvider>
     </Suspense>
   );
 }

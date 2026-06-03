@@ -16,12 +16,23 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { TASKS } from '../../data';
 import type { PersistedState, ResidueVerdict } from '../../data/types';
 
 const STORAGE_KEY = 'acu-master-ops:v1';
 
+/**
+ * Curated done-state baseline. Tasks shipped as `done:true` in the seed
+ * (e.g. completed Phase 0 pre-flight, ACAI Phase A, platform integrations)
+ * render checked from first paint. Stored user toggles always layer ON TOP,
+ * so un-ticking a curated task and any operator progress are preserved.
+ */
+const SEED_DONE: Record<string, boolean> = Object.fromEntries(
+  TASKS.filter((t) => t.done).map((t) => [t.id, true]),
+);
+
 const INITIAL: PersistedState = {
-  done: {},
+  done: { ...SEED_DONE },
   closedMs: {},
   closedODs: {},
   residueVerdict: 'NOT-RUN',
@@ -63,7 +74,7 @@ export function usePersistedState(): UsePersistedState {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<PersistedState>;
-        setState((s) => ({ ...s, ...parsed }));
+        setState((s) => ({ ...s, ...parsed, done: { ...s.done, ...(parsed.done ?? {}) } }));
       }
     } catch {
       // ignore parse errors — keep INITIAL
@@ -77,7 +88,7 @@ export function usePersistedState(): UsePersistedState {
           if (r && r.value) {
             try {
               const parsed = JSON.parse(r.value) as Partial<PersistedState>;
-              setState((s) => ({ ...s, ...parsed }));
+              setState((s) => ({ ...s, ...parsed, done: { ...s.done, ...(parsed.done ?? {}) } }));
             } catch {
               // ignore
             }

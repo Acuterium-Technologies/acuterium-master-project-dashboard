@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { Panel, Pill } from '../ui/primitives';
-import { TASKS } from '../../data';
+import { useTasks, useTasksMeta } from '../../data/useTasks';
 import type { PersistedState, Task } from '../../data/types';
 
 export type CampaignModeProps = {
@@ -23,6 +23,7 @@ const PHASES = [
   { id: 2, label: 'Phase 2 · Fusion (Days 4–7)' },
   { id: 3, label: 'Phase 3 · Exploitation (Days 8–30)' },
   { id: 4, label: 'Phase 4 · ACAI Living Interface (A · B · C)' },
+  { id: 5, label: 'Phase 5 · Platform & Observability' },
 ];
 
 const FAILURE_MODES: ReadonlyArray<readonly [string, string, string]> = [
@@ -35,6 +36,8 @@ const FAILURE_MODES: ReadonlyArray<readonly [string, string, string]> = [
 ];
 
 export function CampaignMode({ state, toggleTask }: CampaignModeProps) {
+  const TASKS = useTasks();
+  const { source: tasksSource } = useTasksMeta();
   const [phaseFilter, setPhaseFilter] = useState<'all' | number>('all');
   const [catFilter, setCatFilter] = useState<'all' | Task['cat']>('all');
 
@@ -58,7 +61,12 @@ export function CampaignMode({ state, toggleTask }: CampaignModeProps) {
 
   return (
     <div className="grid g-1">
-      <Panel title="Campaign workflow" kicker="phase 0 → 3 · ≈50 tracked tasks">
+      <Panel
+        title="Campaign workflow"
+        kicker={`phase 0 → 4 · ${TASKS.length} tracked tasks · ${
+          tasksSource === 'sheet' ? '● live sheet' : '○ static seed'
+        }`}
+      >
         <div className="row" style={{ marginBottom: 12 }}>
           <span className="muted mono xs" style={{ marginRight: 8 }}>PHASE</span>
           <Pill active={phaseFilter === 'all'} onClick={() => setPhaseFilter('all')}>All</Pill>
