@@ -23,14 +23,28 @@
 import { CONFLICTS, DECISIONS, TASKS } from '../data';
 import type { PersistedState } from '../data/types';
 import type { MnemosProfile, NexusSignals, PathosState } from './types';
+import type { PathosDelta } from '../lib/biometrics/face2feel-types';
 
 export type ComputePathosArgs = {
   nexus: NexusSignals;
   profile: MnemosProfile;
   persisted: PersistedState;
+  /**
+   * Phase A · optional Face2Feel emotion delta ([-1,+1] per axis) + its
+   * confidence (0-1). When present (consent active), it nudges the computed
+   * 5-axis state so the living interface reacts to facial emotion.
+   */
+  faceDelta?: PathosDelta | null;
+  faceConfidence?: number;
 };
 
-export function computePATHOS({ nexus, profile, persisted }: ComputePathosArgs): PathosState {
+export function computePATHOS({
+  nexus,
+  profile,
+  persisted,
+  faceDelta,
+  faceConfidence,
+}: ComputePathosArgs): PathosState {
   const conflictsOpen = CONFLICTS.filter((c) => c.status === 'open').length;
   const odClosed = DECISIONS.filter((d) => persisted.closedODs[d.id]).length;
   const tasksDone = TASKS.filter((t) => persisted.done[t.id]).length;
@@ -60,12 +74,20 @@ export function computePATHOS({ nexus, profile, persisted }: ComputePathosArgs):
   if (persisted.residueVerdict === 'CLEAN') satisfaction += 10;
   satisfaction = Math.max(0, Math.min(100, satisfaction));
 
+  // Phase A · blend the Face2Feel delta in (consent-gated, confidence-scaled).
+  // Each delta axis is [-1,+1]; FACE_WEIGHT keeps face a nudge, not an override.
+  const fc = Math.max(0, Math.min(1, faceConfidence ?? 0));
+  const fd = fc > 0 ? faceDelta : null;
+  const FACE_WEIGHT = 45; // max ±45-point nudge at full confidence
+  const blend = (base: number, dv: number): number =>
+    Math.max(0, Math.min(100, base + (fd ? dv * fc * FACE_WEIGHT : 0)));
+
   return {
-    stress: Math.round(stress),
-    focus: Math.round(focus),
-    curiosity: Math.round(curiosity),
-    fatigue: Math.round(fatigue),
-    satisfaction: Math.round(satisfaction),
+    stress: Math.round(blend(stress, fd?.stress ?? 0)),
+    focus: Math.round(blend(focus, fd?.focus ?? 0)),
+    curiosity: Math.round(blend(curiosity, fd?.curiosity ?? 0)),
+    fatigue: Math.round(blend(fatigue, fd?.fatigue ?? 0)),
+    satisfaction: Math.round(blend(satisfaction, fd?.satisfaction ?? 0)),
   };
 }
 
@@ -85,4 +107,21 @@ export function computeBreathRate(pathos: PathosState): string {
 export function applyBreathing(pathos: PathosState): void {
   if (typeof document === 'undefined') return;
   document.documentElement.style.setProperty('--breath-rate', computeBreathRate(pathos));
+}
+
+/**
+ * Phase A · Chameleon tint — maps the emotional state to a subtle accent the
+ * consciousness orb (and any consumer of --pathos-accent) glows with:
+ *   high stress       → cool blue  (calming, per the Hybrid-Trust doctrine)
+ *   high satisfaction → warm gold  (reward)
+ *   otherwise         → neutral cyan
+ * Written as a CSS custom property so styling stays in one place and the
+ * effect is GPU-cheap (a single box-shadow colour).
+ */
+export function applyChameleon(pathos: PathosState): void {
+  if (typeof document === 'undefined') return;
+  let accent = 'rgba(0, 229, 212, 0.10)'; // neutral cyan
+  if (pathos.stress > 70) accent = 'rgba(75, 159, 255, 0.14)'; // cool blue — calm under stress
+  else if (pathos.satisfaction > 65) accent = 'rgba(240, 168, 74, 0.13)'; // warm gold — reward
+  document.documentElement.style.setProperty('--pathos-accent', accent);
 }
