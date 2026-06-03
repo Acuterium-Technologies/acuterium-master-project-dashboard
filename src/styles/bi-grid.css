@@ -401,30 +401,57 @@ body.mode-dashboard > nav.bar {
   display: none;
 }
 
-/* ─── BREAKPOINTS ─── */
-@media (max-width: 1279px) and (min-width: 768px) {
+/* ─── BREAKPOINTS (responsive-hardened) ─────────────────────────────────
+ * Tablet & phone: collapse the 3-rail grid to a single column but STACK the
+ * rails below the center (content-first) instead of HIDING their data, and
+ * keep the section nav reachable via horizontal scroll (was display:none —
+ * which stranded the operator with no way to switch sections, incl. REPORTS).
+ */
+@media (max-width: 1279px) {
   body.mode-dashboard .acu-bi-grid__body {
     grid-template-columns: 1fr;
   }
+  /* center first, rails after */
+  body.mode-dashboard .acu-bi-grid__center { order: -1; }
+  /* let the page scroll instead of trapping content in inner overflow boxes */
   body.mode-dashboard .acu-bi-grid__left-rail,
   body.mode-dashboard .acu-bi-grid__right-rail {
-    display: none;
+    overflow-y: visible;
+  }
+  /* on tablet the rails flow as wrapping cards to save vertical space */
+  body.mode-dashboard .acu-bi-grid__left-rail,
+  body.mode-dashboard .acu-bi-grid__right-rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  body.mode-dashboard .acu-bi-grid__left-rail > *,
+  body.mode-dashboard .acu-bi-grid__right-rail > * {
+    flex: 1 1 240px;
+    min-width: 0;
   }
 }
+
 @media (max-width: 767px) {
   body.mode-dashboard .acu-bi-grid__top-strip {
     grid-template-columns: auto 1fr;
+    gap: 8px;
   }
+  /* keep all section pills (incl. REPORTS) reachable — horizontal scroll */
   body.mode-dashboard .acu-top-strip__sections {
-    display: none;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  body.mode-dashboard .acu-bi-grid__body {
-    grid-template-columns: 1fr;
-  }
+  body.mode-dashboard .acu-top-strip__sections::-webkit-scrollbar { display: none; }
+  body.mode-dashboard .acu-top-strip__pill { flex: 0 0 auto; }
+  /* rails stack full-width on phones */
   body.mode-dashboard .acu-bi-grid__left-rail,
   body.mode-dashboard .acu-bi-grid__right-rail {
-    display: none;
+    flex-direction: column;
   }
+  body.mode-dashboard .acu-bi-grid__center { padding: 12px; }
 }
 
 /* ═══ MOE Matrix Full · Phase 3c.05 (F-13 cleanup) ═══
