@@ -32,6 +32,13 @@ const BASE: Omit<KPI, 'trend'>[] = [
   {id:'K-20',name:'Quarterly refresh cadence',source:'Day 90 scheduled',target:'SCHEDULED',value:'NOT-SCHEDULED',state:'at_risk'},
   {id:'K-21',name:'Phase 1E QA pass rate',source:'Phase-1E-Final-Comprehensive-REPORT',target:'>=95%',value:'100% (48/48)',state:'achieved'},
   {id:'K-22',name:'Phase 2 server-side CWH gate',source:'eND-Phase-2-REPORT',target:'27/27 tests',value:'27/27 + 16/16 preflight + 4/4 smoke',state:'achieved'},
+  // ── Phase C · ACAI-Lab Sandbox KPIs ──
+  {id:'K-23',name:'ACAI-Lab build isolation',source:'Bundle-guard test (TC-05.3)',target:'0 KB lab deps in main chunk',value:'NOT-BUILT',state:'off_track'},
+  {id:'K-24',name:'Neuro-data consent coverage',source:'TC-01.1 consent gate',target:'opt-in gated + revocable',value:'NOT-BUILT',state:'off_track'},
+  {id:'K-25',name:'Affective signal pipeline live',source:'TC-02 webcam + behavioral + replay',target:'LIVE (no headset)',value:'NOT-BUILT',state:'off_track'},
+  {id:'K-26',name:'Affective → PATHOS mapping',source:'TC-02.5 PathosDelta fusion',target:'5-axis mapped',value:'NOT-BUILT',state:'off_track'},
+  {id:'K-27',name:'In-browser MoE throughput',source:'TC-03 small-MoE WebGPU',target:'>5 tokens/sec',value:'NOT-BUILT',state:'off_track'},
+  {id:'K-28',name:'Phase C QA pass rate',source:'TC-05 test suite',target:'>=95%',value:'0%',state:'off_track'},
 ];
 
 export const KPIS: KPI[] = BASE.map((k) => ({ ...k, trend: seedTrend(k.id, k.target) }));
