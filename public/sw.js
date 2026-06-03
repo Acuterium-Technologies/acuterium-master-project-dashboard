@@ -3,7 +3,10 @@
  * Classification: ACUTERIUM-INTERNAL // SOVEREIGN
  *
  * Cache strategy:
- *   - App shell (the /master-ops page, manifest, icons) → cache-first
+ *   - App-shell DOCUMENT (the /master-ops page) → network-first (always fetch
+ *     the freshest deploy; fall back to cache only when offline) so the
+ *     operator never has to hard-refresh to see a new deploy
+ *   - App-shell ASSETS (manifest, icons, fonts) → stale-while-revalidate
  *   - Next.js static assets (/_next/static/*) → stale-while-revalidate
  *   - Self-hosted fonts (/fonts/*) → stale-while-revalidate (also immutable per vercel.json)
  *   - /api/* and authenticated paths → network-first (no offline fallback to avoid stale data)
@@ -12,7 +15,7 @@
  * from the v1.3 PWA bundle. APP_SHELL paths and cache-first matcher are
  * adapted to the Next.js route /master-ops instead of the HTML filename.
  */
-const VERSION = 'acu-master-ops-v1.5.0-alpha.4';
+const VERSION = 'acu-master-ops-v1.5.0-alpha.5';
 const SHELL = 'shell::' + VERSION;
 const RUNTIME = 'runtime::' + VERSION;
 
@@ -75,14 +78,19 @@ self.addEventListener('fetch', (event) => {
     || url.pathname.startsWith('/master-ops/');
 
   if (isShell) {
+    // NETWORK-FIRST for the app-shell document: always serve the freshest
+    // deploy so the operator never needs a manual hard-refresh. Update the
+    // cached copy on success; fall back to cache only when offline. (Hashed
+    // /_next/static chunks keep their immutable cache via the SWR branch
+    // below — their filenames change per deploy, so this is safe.)
     event.respondWith(
-      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+      fetch(req).then((res) => {
         if (res && res.ok) {
           const copy = res.clone();
           caches.open(SHELL).then((c) => c.put(req, copy));
         }
         return res;
-      }).catch(() => caches.match('/master-ops')))
+      }).catch(() => caches.match(req).then((hit) => hit || caches.match('/master-ops')))
     );
     return;
   }
