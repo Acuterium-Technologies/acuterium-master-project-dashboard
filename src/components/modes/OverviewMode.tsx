@@ -19,9 +19,9 @@ import {
   STAGE1,
   STAGE2,
   SURFACES,
-  TASKS,
   FUTURE,
 } from '../../data';
+import { useTasks } from '../../data/useTasks';
 import type { KPI, PersistedState, PortfolioRow } from '../../data/types';
 
 export type OverviewModeProps = {
@@ -54,6 +54,7 @@ const KPI_STATE_BORDER: Record<KPI['state'], string> = {
 };
 
 export function OverviewMode({ state, toggleMilestone }: OverviewModeProps) {
+  const TASKS = useTasks();
   const pathosAxes = [
     { label: 'Stress', color: '#FF6B35' },
     { label: 'Focus', color: '#00E5D4' },

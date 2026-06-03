@@ -66,4 +66,8 @@ export const TASKS: Task[] = [
   {id:'TC-01',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · ACAI-Lab sandbox scaffold (isolated route)'},
   {id:'TC-02',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · EEG / Muse neuro-signal ingest'},
   {id:'TC-03',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · In-browser DeepSeek-MoE inference'},
+  // ── Phase 5 · Platform & Observability ──
+  {id:'TP-01',phase:5,day:34,cat:'CLAUDE',title:'Vercel Web Analytics integration (@vercel/analytics/next)',done:true,completedAt:'2026-06-03'},
+  {id:'TP-02',phase:5,day:34,cat:'CLAUDE',title:'Vercel Speed Insights integration (@vercel/speed-insights/next)',done:true,completedAt:'2026-06-03'},
+  {id:'TP-03',phase:5,day:34,cat:'CLAUDE',title:'Live Sheet-sourced task list (union with seed, zero-regression)',done:true,completedAt:'2026-06-03'},
 ];
