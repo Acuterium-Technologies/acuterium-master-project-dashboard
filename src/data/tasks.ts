@@ -55,4 +55,15 @@ export const TASKS: Task[] = [
   {id:'T2-D7-01',phase:2,day:7,cat:'CLAUDE',title:'Run ACU-STRAT-001 strategic scoring per project'},
   {id:'T2-D7-02',phase:2,day:7,cat:'CLAUDE',title:'Run PRISM-SIE bias-corrected scoring'},
   {id:'T2-D7-03',phase:2,day:7,cat:'CLAUDE',title:'Run RIA cascade engine'},
+  // ── Phase 4 · ACAI Living-Interface roadmap (mirrors Tasks!A52:F60) ──
+  // Ids match the Google Sheet rows so dashboard toggles write back correctly.
+  {id:'TA-01',phase:4,day:31,cat:'CLAUDE',title:'ACAI Phase A · Face2Feel → PATHOS emotion blend (consent-gated)',done:true,completedAt:'2026-06-03'},
+  {id:'TA-02',phase:4,day:31,cat:'CLAUDE',title:'ACAI Phase A · Progressive disclosure (MNEMOS expertise tiers)',done:true,completedAt:'2026-06-03'},
+  {id:'TA-03',phase:4,day:31,cat:'CLAUDE',title:'ACAI Phase A · Chameleon emotional accent tint',done:true,completedAt:'2026-06-03'},
+  {id:'TB-01',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Haptic feedback (navigator.vibrate patterns)'},
+  {id:'TB-02',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Dual-tone chameleon palette (dominant-axis accent)'},
+  {id:'TB-03',phase:4,day:32,cat:'CLAUDE',title:'ACAI Phase B · Multi-sensory feedback layer (visual · haptic · audio)'},
+  {id:'TC-01',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · ACAI-Lab sandbox scaffold (isolated route)'},
+  {id:'TC-02',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · EEG / Muse neuro-signal ingest'},
+  {id:'TC-03',phase:4,day:33,cat:'CLAUDE',title:'ACAI Phase C · In-browser DeepSeek-MoE inference'},
 ];

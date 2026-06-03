@@ -22,6 +22,7 @@ const PHASES = [
   { id: 1, label: 'Phase 1 · Six-Channel Dispatch (Days 1–3)' },
   { id: 2, label: 'Phase 2 · Fusion (Days 4–7)' },
   { id: 3, label: 'Phase 3 · Exploitation (Days 8–30)' },
+  { id: 4, label: 'Phase 4 · ACAI Living Interface (A · B · C)' },
 ];
 
 const FAILURE_MODES: ReadonlyArray<readonly [string, string, string]> = [
