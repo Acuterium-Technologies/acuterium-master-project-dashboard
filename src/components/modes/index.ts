@@ -16,3 +16,4 @@ export type { DecisionsPanelProps } from './DecisionsPanel';
 export { MigrationMode } from './MigrationMode';
 export { DoctrineMode } from './DoctrineMode';
 export type { DoctrineModeProps } from './DoctrineMode';
+export { ReportsMode } from './ReportsMode';
