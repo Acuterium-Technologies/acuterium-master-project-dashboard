@@ -22,6 +22,7 @@ const SECTIONS: ReadonlyArray<{ id: string; label: string }> = [
   { id: 'decisions', label: 'DECISIONS' },
   { id: 'migration', label: 'MIGRATION' },
   { id: 'doctrine', label: 'DOCTRINE' },
+  { id: 'reports', label: 'REPORTS' },
 ];
 
 export type TopStripProps = {

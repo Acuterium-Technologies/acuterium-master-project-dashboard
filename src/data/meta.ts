@@ -17,5 +17,5 @@ export const META = {
   // frozen date. Falls back to the original constant for local/dev builds.
   generated: process.env.NEXT_PUBLIC_BUILD_TIME || '2026-05-21T08:00:00+04:00',
   classification: 'ACUTERIUM-INTERNAL // SOVEREIGN',
-  doctrine: 'Perplexity Commands · Claude Engineers · Cowork Coordinates · Sovereignty Delivers',
+  doctrine: '// Secured. // Scalable. // Genesis Through Intelligence',
 } as const;
