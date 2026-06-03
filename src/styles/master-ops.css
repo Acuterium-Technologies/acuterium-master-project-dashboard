@@ -36,6 +36,12 @@
   /* Phase A · Chameleon tint — set in JS by applyChameleon(pathos): cool blue
    * under stress, warm gold under satisfaction, neutral cyan otherwise. */
   --pathos-accent: transparent;
+  /* Phase B · TB-02 second chameleon accent — dominant-axis colour, layered
+   * with --pathos-accent into the orb's dual-tone glow. */
+  --pathos-accent-2: transparent;
+  /* Phase B · TB-03 multi-sensory feedback flash colour — set transiently by
+   * provideFeedback(event); drives the full-screen acu-fb-pulse vignette. */
+  --feedback-color: transparent;
   /* Phase 3c.01 · CHRONOS gradient fallback (overwritten on mount). */
   --chronos-gradient: linear-gradient(135deg, #030509 0%, #05071A 45%, #0A0520 100%);
 
@@ -78,8 +84,12 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
   width: 420px; height: 420px; border-radius: 50%; pointer-events: none; z-index: 1;
   background: radial-gradient(circle, rgba(0,229,212,.16) 0%, rgba(123,104,238,.08) 50%, transparent 72%);
   filter: blur(8px);
-  /* Phase A · emotional accent glow — colour shifts with PATHOS state. */
-  box-shadow: 0 0 180px 30px var(--pathos-accent);
+  /* Phase A · emotional accent glow — colour shifts with PATHOS state.
+   * Phase B · TB-02 dual-tone — a tight inner halo (--pathos-accent-2, the
+   * dominant axis) layered over the broad outer wash (--pathos-accent). */
+  box-shadow:
+    0 0 180px 30px var(--pathos-accent),
+    0 0 90px 8px var(--pathos-accent-2);
   transition: box-shadow 1200ms cubic-bezier(0.4, 0, 0.2, 1);
   animation: orbBreathe var(--breath-rate) ease-in-out infinite,
              orbDrift 14s ease-in-out infinite alternate;
@@ -90,6 +100,33 @@ body.acu-master-ops ::-webkit-scrollbar-track { background: transparent; }
  * Components opt in by tagging non-essential guidance with `.acu-hint`. */
 body.acu-expertise-expert .acu-hint { display: none; }
 body.acu-expertise-proficient .acu-hint { opacity: 0.6; }
+
+/* ─── Phase B · TB-03 multi-sensory feedback — visual channel ───────────
+ * A brief full-screen edge vignette in the event's accent colour, layered
+ * above all surfaces but click-through (pointer-events:none). provideFeedback()
+ * toggles body.acu-fb-pulse for ~700ms; reduced-motion callers skip the class.
+ * The colour comes from --feedback-color (set per-event in JS). */
+body.acu-master-ops::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, var(--feedback-color) 100%);
+  transition: opacity 0.2s ease;
+}
+body.acu-master-ops.acu-fb-pulse::after {
+  animation: acuFeedbackPulse 0.7s ease-out;
+}
+@keyframes acuFeedbackPulse {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.acu-master-ops.acu-fb-pulse::after { animation: none; opacity: 0; }
+}
 @keyframes orbBreathe {
   0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: .6; }
   50% { transform: translate(-50%,-50%) scale(1.08); opacity: .92; }

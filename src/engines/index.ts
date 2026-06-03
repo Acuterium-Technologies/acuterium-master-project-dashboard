@@ -18,6 +18,8 @@ export { computePATHOS, applyBreathing, applyChameleon } from './pathos';
 export type { ComputePathosArgs } from './pathos';
 export { useProgressiveDisclosure, expertiseTier } from './progressive-disclosure';
 export type { ExpertiseTier } from './progressive-disclosure';
+export { provideFeedback } from './feedback';
+export type { FeedbackEvent } from './feedback';
 export { PathosSidebar } from './PathosSidebar';
 export type { PathosSidebarProps } from './PathosSidebar';
 export {

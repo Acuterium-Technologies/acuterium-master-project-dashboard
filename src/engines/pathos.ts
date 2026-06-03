@@ -115,13 +115,48 @@ export function applyBreathing(pathos: PathosState): void {
  *   high stress       → cool blue  (calming, per the Hybrid-Trust doctrine)
  *   high satisfaction → warm gold  (reward)
  *   otherwise         → neutral cyan
- * Written as a CSS custom property so styling stays in one place and the
- * effect is GPU-cheap (a single box-shadow colour).
+ *
+ * Phase B · TB-02 chameleon palette — adds a SECOND accent (--pathos-accent-2)
+ * driven by the *dominant* emotion axis, so the orb reads as a dual-tone glow
+ * that shifts with the operator's strongest felt state. The two custom
+ * properties feed a single layered box-shadow (see #consciousness-orb), keeping
+ * the effect GPU-cheap (no JS animation, just two colour tokens + a transition).
+ *
+ *   dominant axis →  accent-2 colour
+ *   ───────────────────────────────────
+ *   stress        →  cool blue   (de-escalate)
+ *   focus         →  bright cyan (in-the-zone)
+ *   curiosity     →  violet      (exploration)
+ *   fatigue       →  dim slate   (low energy)
+ *   satisfaction  →  warm gold   (reward)
  */
+const AXIS_ACCENT_2: Record<keyof PathosState, string> = {
+  stress: 'rgba(75, 159, 255, 0.20)', // cool blue
+  focus: 'rgba(0, 229, 212, 0.20)', // bright cyan
+  curiosity: 'rgba(123, 104, 238, 0.20)', // violet
+  fatigue: 'rgba(120, 134, 150, 0.16)', // dim slate
+  satisfaction: 'rgba(240, 168, 74, 0.20)', // warm gold
+};
+
 export function applyChameleon(pathos: PathosState): void {
   if (typeof document === 'undefined') return;
+
+  // Primary accent — the calm/reward/neutral band (Phase A behaviour preserved).
   let accent = 'rgba(0, 229, 212, 0.10)'; // neutral cyan
   if (pathos.stress > 70) accent = 'rgba(75, 159, 255, 0.14)'; // cool blue — calm under stress
   else if (pathos.satisfaction > 65) accent = 'rgba(240, 168, 74, 0.13)'; // warm gold — reward
-  document.documentElement.style.setProperty('--pathos-accent', accent);
+
+  // Secondary accent — Phase B · dual-tone driven by the dominant axis.
+  const axes: Array<keyof PathosState> = [
+    'stress',
+    'focus',
+    'curiosity',
+    'fatigue',
+    'satisfaction',
+  ];
+  const dominant = axes.reduce((a, b) => (pathos[b] > pathos[a] ? b : a), 'focus');
+
+  const root = document.documentElement.style;
+  root.setProperty('--pathos-accent', accent);
+  root.setProperty('--pathos-accent-2', AXIS_ACCENT_2[dominant]);
 }
