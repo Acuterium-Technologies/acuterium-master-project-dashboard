@@ -73,7 +73,8 @@ export type UseKairosResult = {
   mode: KairosMode;
   setMode: (m: KairosMode) => void;
   autoSwitch: boolean;
-  setAutoSwitch: Dispatch<SetStateAction<boolean>>;
+  /** Persisting toggle — true re-enables NEXUS auto-switch, false pins the mode. */
+  setAutoSwitch: (on: boolean) => void;
 };
 
 export function useKAIROS({
@@ -83,7 +84,9 @@ export function useKAIROS({
   setProfile,
 }: UseKairosArgs): UseKairosResult {
   const [mode, setModeState] = useState<KairosMode>(profile.dominantMode || 'aui');
-  const [autoSwitch, setAutoSwitch] = useState(true);
+  // Honour the persisted preference: if the operator previously pinned a mode
+  // (autoSwitch=false), stay pinned across reloads instead of resuming auto.
+  const [autoSwitch, setAutoSwitch] = useState(profile.autoSwitch ?? true);
   const lastAutoSwitchRef = useRef(0);
 
   /* refs that always point to the latest engines — so the long-lived
@@ -114,10 +117,41 @@ export function useKAIROS({
         body.classList.add('mode-' + m);
       }
       setModeState(m);
+      // A manual pick (mode pill or keyboard shortcut) PINS the mode: suppress
+      // KAIROS auto-switch so the operator's choice is not overridden on the
+      // next 8s tick. autoRef is mutated synchronously so the long-lived
+      // interval sees the lock immediately. Closes the "site keeps switching
+      // to HUD" report.
+      const lock = source === 'user';
+      if (lock) {
+        setAutoSwitch(false);
+        autoRef.current = false;
+      }
       if (source === 'kairos') showModeToast('KAIROS → ' + MODE_LABELS[m]);
       setProfile((p) => {
         const history = [...(p.modeHistory || []), m].slice(-40);
-        const np: MnemosProfile = { ...p, dominantMode: m, modeHistory: history };
+        const np: MnemosProfile = {
+          ...p,
+          dominantMode: m,
+          modeHistory: history,
+          autoSwitch: lock ? false : (p.autoSwitch ?? true),
+        };
+        MNEMOS.save(np);
+        return np;
+      });
+    },
+    [setProfile],
+  );
+
+  // Persisting auto-switch toggle. Turning auto back ON re-arms the interval
+  // (resets the throttle clock so it can re-evaluate on the next tick).
+  const setAuto = useCallback(
+    (on: boolean) => {
+      setAutoSwitch(on);
+      autoRef.current = on;
+      if (on) lastAutoSwitchRef.current = 0;
+      setProfile((p) => {
+        const np: MnemosProfile = { ...p, autoSwitch: on };
         MNEMOS.save(np);
         return np;
       });
@@ -209,7 +243,7 @@ export function useKAIROS({
     mode,
     setMode: (m: KairosMode) => apply(m, 'user'),
     autoSwitch,
-    setAutoSwitch,
+    setAutoSwitch: setAuto,
   };
 }
 

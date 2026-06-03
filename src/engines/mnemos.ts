@@ -32,6 +32,7 @@ function defaults(): MnemosProfile {
     lastSeen: now,
     dominantMode: 'aui',
     modeHistory: [],
+    autoSwitch: true,
     hasTouch: false,
     avgMouseVel: 0,
     avgScrollVel: 0,

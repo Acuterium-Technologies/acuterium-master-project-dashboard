@@ -26,6 +26,7 @@ import {
   useState,
 } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { ulid } from 'ulid';
 
 import {
   MNEMOS,
@@ -371,26 +372,86 @@ function MasterOpsApp() {
     [sessionId, pathos, kairos.mode, composedDoctrineScore],
   );
 
+  // ── Phase 3a.06 · Sheets write-back for the gated toggles ───────────────
+  // The four toggles below previously only called /api/cwh/transition and the
+  // local toggle, so (A) lastSaved stayed null whenever the CWH server was
+  // unreachable, and (B) Google Sheets was never written for checkbox state.
+  // persistToSheets reuses the proven /api/sheets/update endpoint (same payload
+  // the EditDrawer uses) to actually push the change to the canonical sheet.
+  // Local save is authoritative (local-first sovereignty): a Sheets failure is
+  // surfaced as a soft toast but does NOT revert the operator's local change —
+  // only a CWH governance DENY reverts it.
+  const persistToSheets = useCallback(
+    (
+      target: 'task-update' | 'milestone-update',
+      targetId: string,
+      field: string,
+      newValue: string,
+    ) => {
+      fetch('/api/sheets/update', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target,
+          targetId,
+          field,
+          newValue,
+          actor: {
+            session: sessionId,
+            pathos: {
+              stress: pathos.stress,
+              focus: pathos.focus,
+              curiosity: pathos.curiosity,
+              fatigue: pathos.fatigue,
+              satisfaction: pathos.satisfaction,
+            },
+          },
+          context: {
+            kairosMode: KAIROS_MODE_TO_API[kairos.mode],
+            doctrineScore: composedDoctrineScore,
+          },
+          idempotencyKey: ulid(),
+        }),
+      })
+        .then(async (r) => {
+          if (!r.ok) {
+            const j = (await r.json().catch(() => ({}))) as { reason?: string; error?: string };
+            showModeToast(
+              'Sheets persist failed · ' + (j.reason ?? j.error ?? r.status) + ' · local saved',
+            );
+          }
+        })
+        .catch(() => showModeToast('Sheets persist offline · local saved'));
+    },
+    [sessionId, pathos, kairos.mode, composedDoctrineScore],
+  );
+
   const gatedToggleTask = useCallback(
     (id: string) => {
       const before = !!state.done[id];
+      // 1. LOCAL-FIRST — apply + persist locally immediately so lastSaved always
+      //    reflects the latest attempt, even if the CWH server is unreachable.
+      toggleTask(id);
+      // 2. SERVER GATE — reconcile against the authoritative CWH verdict.
       const input = buildRequest('task', id, before ? 'done' : 'open', before ? 'open' : 'done');
-      const outcome = cwhSubmit.submit(input);
-      // Optimistic apply when preview allows — reconcile on server response.
-      Promise.resolve(outcome).then((o) => {
-        if (o.allow) {
-          toggleTask(id);
-        } else {
-          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+      Promise.resolve(cwhSubmit.submit(input)).then((o) => {
+        if (!o.allow) {
+          toggleTask(id); // revert local change on governance deny
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
+          return;
         }
+        // 3. SHEETS PERSIST — Tasks tab, `done` column (TRUE/FALSE booleans).
+        persistToSheets('task-update', id, 'done', before ? 'FALSE' : 'TRUE');
       });
     },
-    [state, toggleTask, buildRequest, cwhSubmit],
+    [state, toggleTask, buildRequest, cwhSubmit, persistToSheets],
   );
 
   const gatedToggleMilestone = useCallback(
     (id: string) => {
       const before = !!state.closedMs[id];
+      toggleMilestone(id);
       const input = buildRequest(
         'milestone',
         id,
@@ -398,19 +459,22 @@ function MasterOpsApp() {
         before ? 'open' : 'closed',
       );
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
-        if (o.allow) {
+        if (!o.allow) {
           toggleMilestone(id);
-        } else {
-          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
+          return;
         }
+        // Milestones tab uses a `closed` boolean column (TRUE/FALSE).
+        persistToSheets('milestone-update', id, 'closed', before ? 'FALSE' : 'TRUE');
       });
     },
-    [state, toggleMilestone, buildRequest, cwhSubmit],
+    [state, toggleMilestone, buildRequest, cwhSubmit, persistToSheets],
   );
 
   const gatedToggleOD = useCallback(
     (id: string) => {
       const before = !!state.closedODs[id];
+      toggleOD(id);
       const input = buildRequest(
         'od',
         id,
@@ -418,11 +482,12 @@ function MasterOpsApp() {
         before ? 'open' : 'closed',
       );
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
-        if (o.allow) {
+        if (!o.allow) {
           toggleOD(id);
-        } else {
-          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
         }
+        // Owner-decision closures are local-first only: the backing sheet has
+        // no `decisions` tab yet (schema follow-up). CWH still gates + audits.
       });
     },
     [state, toggleOD, buildRequest, cwhSubmit],
@@ -432,13 +497,15 @@ function MasterOpsApp() {
     (v: ResidueVerdict) => {
       const before = state.residueVerdict;
       if (before === v) return;
+      setResidue(v);
       const input = buildRequest('residue', 'CH-6', before, v);
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
-        if (o.allow) {
-          setResidue(v);
-        } else {
-          showModeToast('CWH GATE · ' + (o.reason ?? 'denied'));
+        if (!o.allow) {
+          setResidue(before);
+          showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
         }
+        // Residue verdict is local-first only: no `channels` tab in the sheet
+        // yet (schema follow-up). CWH still gates + audits the transition.
       });
     },
     [state, setResidue, buildRequest, cwhSubmit],
@@ -588,12 +655,25 @@ function MasterOpsApp() {
             <button
               key={km.id}
               className={`mode-btn ${kairos.mode === km.id ? 'active' : ''}`}
-              title={`KAIROS → ${km.id.toUpperCase()} (${km.hint})`}
+              title={`KAIROS → ${km.id.toUpperCase()} (${km.hint}) · pins this view`}
               onClick={() => kairos.setMode(km.id)}
             >
               {km.label}
             </button>
           ))}
+          {/* AUTO toggle · when ON, NEXUS may auto-switch the view; when OFF the
+              selected mode is pinned. Picking any mode pill above also pins. */}
+          <button
+            className={`mode-btn ${kairos.autoSwitch ? 'active' : ''}`}
+            title={
+              kairos.autoSwitch
+                ? 'KAIROS auto-switch ON — NEXUS may change the view. Click to pin the current mode.'
+                : `KAIROS pinned to ${kairos.mode.toUpperCase()}. Click to re-enable auto-switch.`
+            }
+            onClick={() => kairos.setAutoSwitch(!kairos.autoSwitch)}
+          >
+            {kairos.autoSwitch ? 'AUTO' : 'PINNED'}
+          </button>
           <ChronosLabel variant="compact" />
           <span
             id="nexus-chip"
