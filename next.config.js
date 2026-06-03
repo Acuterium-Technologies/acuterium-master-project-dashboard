@@ -2,6 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Stamp every build with its UTC timestamp so the dashboard footer can show a
+  // real "last updated" instead of a frozen constant. Evaluated when `next
+  // build` runs, so it refreshes on each Vercel deploy.
+  env: {
+    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString()
+  },
   experimental: {
     serverActions: { allowedOrigins: ['master-project.acuterium.ai'] }
   },
@@ -34,6 +40,18 @@ const nextConfig = {
           // Microphone + geolocation stay closed until Phase 3d-ii / 3d-iii.
           { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' }
         ]
+      },
+      {
+        // Force the navigational HTML document to always revalidate so a new
+        // deploy is picked up without a manual hard-refresh. This only targets
+        // the page routes — hashed assets under /_next/static keep Next.js's
+        // immutable long-cache (their filenames change per build).
+        source: '/master-ops/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-store, max-age=0, must-revalidate' }]
+      },
+      {
+        source: '/',
+        headers: [{ key: 'Cache-Control', value: 'no-store, max-age=0, must-revalidate' }]
       }
     ];
   }
