@@ -13,6 +13,7 @@
 
 import { useCallback, useState } from 'react';
 import { Panel } from '../ui/primitives';
+import { provideFeedback } from '../../engines/feedback';
 
 type Metrics = {
   tasks: { done: number; total: number };
@@ -85,6 +86,7 @@ export function ReportsMode() {
         return;
       }
       setData((await res.json()) as ReportData);
+      provideFeedback('report'); // Phase B · TB-03 multi-sensory report cue
     } catch {
       setError('Network error while generating the report.');
     } finally {

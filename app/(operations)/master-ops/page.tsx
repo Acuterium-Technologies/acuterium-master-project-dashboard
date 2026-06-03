@@ -36,6 +36,7 @@ import {
   applyBreathing,
   applyChameleon,
   useProgressiveDisclosure,
+  provideFeedback,
   PathosSidebar,
   useKAIROS,
   useTUUIRipples,
@@ -457,10 +458,12 @@ function MasterOpsApp() {
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
         if (!o.allow) {
           toggleTask(id); // revert local change on governance deny
+          provideFeedback('deny'); // Phase B · TB-03 multi-sensory deny cue
           showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
           return;
         }
         // 3. SHEETS PERSIST — Tasks tab, `done` column (TRUE/FALSE booleans).
+        provideFeedback('save'); // Phase B · TB-03 multi-sensory save cue
         persistToSheets('task-update', id, 'done', before ? 'FALSE' : 'TRUE');
       });
     },
@@ -480,10 +483,12 @@ function MasterOpsApp() {
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
         if (!o.allow) {
           toggleMilestone(id);
+          provideFeedback('deny'); // Phase B · TB-03 multi-sensory deny cue
           showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
           return;
         }
         // Milestones tab uses a `closed` boolean column (TRUE/FALSE).
+        provideFeedback('save'); // Phase B · TB-03 multi-sensory save cue
         persistToSheets('milestone-update', id, 'closed', before ? 'FALSE' : 'TRUE');
       });
     },
@@ -503,10 +508,13 @@ function MasterOpsApp() {
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
         if (!o.allow) {
           toggleOD(id);
+          provideFeedback('deny'); // Phase B · TB-03 multi-sensory deny cue
           showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
+          return;
         }
         // Owner-decision closures are local-first only: the backing sheet has
         // no `decisions` tab yet (schema follow-up). CWH still gates + audits.
+        provideFeedback('save'); // Phase B · TB-03 multi-sensory save cue
       });
     },
     [state, toggleOD, buildRequest, cwhSubmit],
@@ -521,10 +529,13 @@ function MasterOpsApp() {
       Promise.resolve(cwhSubmit.submit(input)).then((o) => {
         if (!o.allow) {
           setResidue(before);
+          provideFeedback('deny'); // Phase B · TB-03 multi-sensory deny cue
           showModeToast('CWH GATE · ' + (o.reason ?? 'denied') + ' · reverted');
+          return;
         }
         // Residue verdict is local-first only: no `channels` tab in the sheet
         // yet (schema follow-up). CWH still gates + audits the transition.
+        provideFeedback('save'); // Phase B · TB-03 multi-sensory save cue
       });
     },
     [state, setResidue, buildRequest, cwhSubmit],
