@@ -5,6 +5,23 @@ const nextConfig = {
   experimental: {
     serverActions: { allowedOrigins: ['master-project.acuterium.ai'] }
   },
+  webpack: (config, { isServer }) => {
+    // face-api.js references Node 'fs'/'path' for an optional file-loading
+    // code path. It only runs inside the Face2Feel web worker via dynamic
+    // import — never in the main client bundle — so the modules are never
+    // actually needed in the browser. Provide empty fallbacks so webpack
+    // stops emitting the non-fatal "Module not found: Can't resolve 'fs'"
+    // warning during the client build.
+    if (!isServer) {
+      config.resolve = config.resolve || {};
+      config.resolve.fallback = {
+        ...(config.resolve.fallback || {}),
+        fs: false,
+        path: false
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {

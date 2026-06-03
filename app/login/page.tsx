@@ -62,7 +62,15 @@ function LoginForm() {
           border: '1px solid #1F2F45'
         }}
       >
-        <h1 style={{ fontSize: '18px', margin: '0 0 6px', fontWeight: 600 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/acuterium-logo-mark.png"
+          alt="Acuterium"
+          width={64}
+          height={64}
+          style={{ display: 'block', margin: '0 auto 16px', objectFit: 'contain' }}
+        />
+        <h1 style={{ fontSize: '18px', margin: '0 0 6px', fontWeight: 600, textAlign: 'center' }}>
           Acuterium Master Project Dashboard
         </h1>
         <p
