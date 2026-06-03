@@ -49,6 +49,13 @@ export type MnemosProfile = {
   lastSeen: string;
   dominantMode: KairosMode;
   modeHistory: KairosMode[];
+  /**
+   * KAIROS auto-switch preference. When false the operator has pinned a mode
+   * and the NEXUS-driven auto-switch interval is suppressed. Persisted so the
+   * choice survives reloads (closes the "site keeps switching to HUD" report).
+   * Optional for back-compat with pre-v1.4.1 stored profiles (defaults true).
+   */
+  autoSwitch?: boolean;
   hasTouch: boolean;
   avgMouseVel: number;
   avgScrollVel: number;

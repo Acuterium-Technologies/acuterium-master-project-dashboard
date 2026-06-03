@@ -22,18 +22,28 @@ let cachedClient: sheets_v4.Sheets | null = null;
 let cacheKey = '';
 
 export function getSheetsClient(): sheets_v4.Sheets | null {
-  const { GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY } = process.env;
-  if (!GOOGLE_SHEETS_CLIENT_EMAIL || !GOOGLE_SHEETS_PRIVATE_KEY) {
+  // Accept BOTH naming conventions. The write client historically required
+  // GOOGLE_SHEETS_CLIENT_EMAIL / GOOGLE_SHEETS_PRIVATE_KEY, but the read
+  // adapter (lib/sheets.ts), .env.example, and the DEPLOYMENT-GUIDE env table
+  // document GOOGLE_SERVICE_ACCOUNT_EMAIL / GOOGLE_PRIVATE_KEY. When an
+  // operator set Vercel from the env table, this client silently returned null
+  // and every Sheets write fell back to no-op ("last save: never"). Falling
+  // back across both names unifies the two adapters and removes that footgun.
+  const email =
+    process.env.GOOGLE_SHEETS_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey =
+    process.env.GOOGLE_SHEETS_PRIVATE_KEY || process.env.GOOGLE_PRIVATE_KEY;
+  if (!email || !privateKey) {
     return null;
   }
 
   // Re-init if env changed at runtime (rare; helpful for tests).
-  const k = GOOGLE_SHEETS_CLIENT_EMAIL + ':' + GOOGLE_SHEETS_PRIVATE_KEY.length;
+  const k = email + ':' + privateKey.length;
   if (cachedClient && cacheKey === k) return cachedClient;
 
   const auth = new google.auth.JWT({
-    email: GOOGLE_SHEETS_CLIENT_EMAIL,
-    key: GOOGLE_SHEETS_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    email,
+    key: privateKey.replace(/\\n/g, '\n'),
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
 
