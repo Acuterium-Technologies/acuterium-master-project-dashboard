@@ -57,6 +57,11 @@ export function middleware(request: NextRequest) {
     // (consent gate happens client-side before fetch is even invoked).
     pathname.startsWith('/models/') ||
     pathname.startsWith('/workers/') ||
+    // Vercel Web Analytics + Speed Insights telemetry. These first-party
+    // collector paths (script.js + the view/vitals beacons) must never be
+    // redirected to /login — otherwise a beacon sent after a cookie expires
+    // gets an HTML 307 instead of reaching Vercel. Non-sensitive by nature.
+    pathname.startsWith('/_vercel/') ||
     pathname === '/manifest.webmanifest' ||
     pathname === '/sw.js' ||
     pathname === '/sovereign-fonts.css' ||
